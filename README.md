@@ -2,12 +2,71 @@
 
 A production-ready, responsive Vue.js application that fetches and displays user data from the JSONPlaceholder API, with interactive filtering, sorting features, and detailed user views. This project demonstrates best practices in Vue.js development, focusing on maintainability, performance, and user experience.
 
-![User Dashboard Screenshot](https://via.placeholder.com/800x450.png?text=User+Dashboard+Screenshot)
+## Screenshots
 
-TODO: show all screenshots of the app, include: user management, error handling (can't fetch API, network errors, route not found, etc.), loading states, user details view, etc.
+### User Dashboard
+
+#### Light Theme
+![User Dashboard - Light Theme](screenshots/user-dashboard-light.png)
+
+#### Dark Theme
+![User Dashboard - Dark Theme](screenshots/user-dashboard-dark.png)
+
+### User Details View
+
+![User Details - Light Theme](screenshots/user-detail-light.png)
+
+### Mobile Responsiveness
+
+#### User Dashboard - Mobile View
+<div style="display: flex; gap: 20px; justify-content: center;">
+  <div>
+    <p align="center"><strong>Light Theme</strong></p>
+    <img src="screenshots/user-dashboard-mobile-light.png" alt="User Dashboard Mobile - Light Theme" width="300"/>
+  </div>
+  <div>
+    <p align="center"><strong>Dark Theme</strong></p>
+    <img src="screenshots/user-dashboard-mobile-dark.png" alt="User Dashboard Mobile - Dark Theme" width="300"/>
+  </div>
+</div>
+
+#### User Details - Mobile View
+<div style="display: flex; gap: 20px; justify-content: center;">
+  <div>
+    <p align="center"><strong>Light Theme</strong></p>
+    <img src="screenshots/user-detail-mobile-light.png" alt="User Details Mobile - Light Theme" width="300"/>
+  </div>
+  <div>
+    <p align="center"><strong>Dark Theme</strong></p>
+    <img src="screenshots/user-detail-mobile-dark.png" alt="User Details Mobile - Dark Theme" width="300"/>
+  </div>
+</div>
+
+#### Additional User Details - Mobile View
+![User Details Additional Mobile - Light Theme](screenshots/user-detail-mobile-2-light.png)
+
+### Navigation
+
+#### Mobile Navigation Menu
+![Mobile Navigation Menu - Light Theme](screenshots/hamburger-menu-light.png)
+
+### Error Handling
+
+#### 404 Page Not Found
+<div style="display: flex; gap: 20px; justify-content: center;">
+  <div>
+    <p align="center"><strong>Desktop View</strong></p>
+    <img src="screenshots/404-light.png" alt="404 Page Not Found - Light Theme"/>
+  </div>
+  <div>
+    <p align="center"><strong>Mobile View</strong></p>
+    <img src="screenshots/404-mobile-light.png" alt="404 Page Not Found Mobile - Light Theme" width="300"/>
+  </div>
+</div>
 
 ## Table of Contents
 
+- [Screenshots](#screenshots)
 - [Features](#features)
 - [Technology Stack](#technology-stack)
 - [Architecture and Design Patterns](#architecture-and-design-patterns)
