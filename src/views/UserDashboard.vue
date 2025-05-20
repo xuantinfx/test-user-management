@@ -18,7 +18,7 @@
       <template v-else>
         <div class="results-info">
           <p>
-            Showing {{ paginatedUsers.length }} of {{ users.length }} users
+            Showing {{ paginatedUsers.length }} of {{ filteredUsers.length }} users
             <span v-if="isFiltered">(filtered)</span>
           </p>
           <button
@@ -53,6 +53,7 @@ const {
   users,
   paginatedUsers,
   sortedUsers,
+  filteredUsers,
   isLoading,
   isError,
   error,

@@ -7,9 +7,8 @@
         <input
           id="name-filter"
           type="text"
-          v-model="filters.name"
+          v-model="name"
           placeholder="Filter by name"
-          @input="updateFilters"
         />
       </div>
 
@@ -18,9 +17,8 @@
         <input
           id="email-filter"
           type="text"
-          v-model="filters.email"
+          v-model="email"
           placeholder="Filter by email"
-          @input="updateFilters"
         />
       </div>
 
@@ -29,9 +27,8 @@
         <input
           id="company-filter"
           type="text"
-          v-model="filters.company"
+          v-model="company"
           placeholder="Filter by company"
-          @input="updateFilters"
         />
       </div>
 
@@ -42,30 +39,32 @@
 
 <script setup lang="ts">
 import { useUsers } from '@/hooks/useUsers';
-import { reactive, watch } from 'vue';
+import { computed } from 'vue';
 import { UserFilters } from '@/types';
 
-const { filters: storeFilters, setFilter, clearFilters } = useUsers();
+// Get the shared filters and actions from the hook
+const { filters, setFilter, clearFilters } = useUsers();
 
-// Create a local reactive copy of the filters
-const filters = reactive<UserFilters>({
-  name: storeFilters.value.name,
-  email: storeFilters.value.email,
-  company: storeFilters.value.company
+// Create computed properties for two-way binding
+const name = computed({
+  get: () => filters.value.name,
+  set: (value: string) => setFilter('name', value)
 });
 
-// Watch for store filter changes and update local filters
-watch(() => storeFilters.value, (newFilters: UserFilters) => {
-  filters.name = newFilters.name;
-  filters.email = newFilters.email;
-  filters.company = newFilters.company;
-}, { deep: true });
+const email = computed({
+  get: () => filters.value.email,
+  set: (value: string) => setFilter('email', value)
+});
 
-// Update store filters when local filters change
+const company = computed({
+  get: () => filters.value.company,
+  set: (value: string) => setFilter('company', value)
+});
+
+// Update all filters at once (for input events)
 const updateFilters = (): void => {
-  setFilter('name', filters.name);
-  setFilter('email', filters.email);
-  setFilter('company', filters.company);
+  // This is now a no-op since we're using computed properties
+  // that automatically update the shared state
 };
 </script>
 
@@ -132,6 +131,7 @@ input {
   transition: all 0.2s ease;
   background-color: var(--bg-light);
   height: 34px;
+  color: var(--text-color);
 }
 
 input:hover {

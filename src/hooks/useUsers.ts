@@ -1,4 +1,4 @@
-import { ref, computed, ComputedRef } from 'vue';
+import { computed, ComputedRef, reactive } from 'vue';
 import { useQuery, useQueryClient } from '@tanstack/vue-query';
 import { userService } from '../services/api';
 import { User, UserFilters, SortCriteria, Pagination } from '@/types';
@@ -12,66 +12,87 @@ export const userKeys = {
   detail: (id: number | string) => [...userKeys.details(), id] as const,
 };
 
-/**
- * Hook for fetching and filtering users with pagination support
- */
-export function useUsers() {
+// Create a shared state that will be used across all components
+// This ensures that all components use the same state
+const sharedState = {
   // Filter state
-  const filters = ref<UserFilters>({
+  filters: reactive<UserFilters>({
     name: '',
     email: '',
     company: ''
-  });
+  }),
 
   // Sorting state
-  const sortBy = ref<SortCriteria>({
+  sortBy: reactive<SortCriteria>({
     field: 'id',
     direction: 'asc'
-  });
+  }),
 
   // Pagination state
-  const pagination = ref<Pagination>({
+  pagination: reactive<Pagination>({
     currentPage: 1,
     pageSize: 5,
     totalItems: 0,
     totalPages: 0
-  });
+  }),
 
-  // Fetch users query
+  // Query instance (will be set in the hook)
+  queryInstance: null as any,
+
+  // Flag to track if the hook has been initialized
+  initialized: false
+};
+
+/**
+ * Hook for fetching and filtering users with pagination support
+ * Implemented as a singleton to ensure state is shared across components
+ */
+export function useUsers() {
+  // Only initialize the query once
+  if (!sharedState.initialized) {
+    // Fetch users query
+    const query = useQuery({
+      queryKey: userKeys.lists(),
+      queryFn: async () => {
+        const response = await userService.getUsers();
+        return response.data;
+      },
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    });
+
+    // Store the query instance in shared state
+    sharedState.queryInstance = query;
+    sharedState.initialized = true;
+  }
+
+  // Get the query instance from shared state
   const {
     data: users,
     isLoading,
     isError,
     error,
     refetch
-  } = useQuery({
-    queryKey: userKeys.lists(),
-    queryFn: async () => {
-      const response = await userService.getUsers();
-      return response.data;
-    },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
+  } = sharedState.queryInstance;
 
   // Filter users based on current filters
   const filteredUsers: ComputedRef<User[]> = computed(() => {
     if (!users.value || users.value.length === 0) return [];
 
-    const filtered = users.value.filter(user => {
-      const nameMatch = user.name.toLowerCase().includes(filters.value.name.toLowerCase());
-      const emailMatch = user.email.toLowerCase().includes(filters.value.email.toLowerCase());
-      const companyMatch = user.company.name.toLowerCase().includes(filters.value.company.toLowerCase());
+    const filtered = users.value.filter((user: User) => {
+      const nameMatch = user.name.toLowerCase().includes(sharedState.filters.name.toLowerCase());
+      const emailMatch = user.email.toLowerCase().includes(sharedState.filters.email.toLowerCase());
+      const companyMatch = user.company.name.toLowerCase().includes(sharedState.filters.company.toLowerCase());
 
       return nameMatch && emailMatch && companyMatch;
     });
 
     // Update pagination totals
-    pagination.value.totalItems = filtered.length;
-    pagination.value.totalPages = Math.ceil(filtered.length / pagination.value.pageSize);
+    sharedState.pagination.totalItems = filtered.length;
+    sharedState.pagination.totalPages = Math.ceil(filtered.length / sharedState.pagination.pageSize);
 
     // Reset to first page if current page is out of bounds
-    if (pagination.value.currentPage > pagination.value.totalPages && pagination.value.totalPages > 0) {
-      pagination.value.currentPage = 1;
+    if (sharedState.pagination.currentPage > sharedState.pagination.totalPages && sharedState.pagination.totalPages > 0) {
+      sharedState.pagination.currentPage = 1;
     }
 
     return filtered;
@@ -85,12 +106,12 @@ export function useUsers() {
       let fieldA: any, fieldB: any;
 
       // Handle nested fields like company.name
-      if (sortBy.value.field === 'company') {
+      if (sharedState.sortBy.field === 'company') {
         fieldA = a.company.name;
         fieldB = b.company.name;
       } else {
-        fieldA = a[sortBy.value.field as keyof User];
-        fieldB = b[sortBy.value.field as keyof User];
+        fieldA = a[sharedState.sortBy.field as keyof User];
+        fieldB = b[sharedState.sortBy.field as keyof User];
       }
 
       // Case insensitive string comparison
@@ -99,7 +120,7 @@ export function useUsers() {
         fieldB = fieldB.toLowerCase();
       }
 
-      if (sortBy.value.direction === 'asc') {
+      if (sharedState.sortBy.direction === 'asc') {
         return fieldA > fieldB ? 1 : -1;
       } else {
         return fieldA < fieldB ? 1 : -1;
@@ -111,78 +132,88 @@ export function useUsers() {
   const paginatedUsers: ComputedRef<User[]> = computed(() => {
     if (!sortedUsers.value || sortedUsers.value.length === 0) return [];
 
-    const startIndex = (pagination.value.currentPage - 1) * pagination.value.pageSize;
-    const endIndex = startIndex + pagination.value.pageSize;
+    const startIndex = (sharedState.pagination.currentPage - 1) * sharedState.pagination.pageSize;
+    const endIndex = startIndex + sharedState.pagination.pageSize;
 
     return sortedUsers.value.slice(startIndex, endIndex);
   });
 
   // Check if any filters are applied
   const isFiltered: ComputedRef<boolean> = computed(() => {
-    return Object.values(filters.value).some(value => value !== '');
+    return Object.values(sharedState.filters).some(value => value !== '');
   });
 
   // Set filter value
   const setFilter = (filterName: keyof UserFilters, value: string): void => {
-    filters.value[filterName] = value;
+    sharedState.filters[filterName] = value;
     // Reset to first page when filtering
-    pagination.value.currentPage = 1;
+    sharedState.pagination.currentPage = 1;
   };
 
   // Clear all filters
   const clearFilters = (): void => {
-    filters.value = {
-      name: '',
-      email: '',
-      company: ''
-    };
+    sharedState.filters.name = '';
+    sharedState.filters.email = '';
+    sharedState.filters.company = '';
+
     // Reset to first page when clearing filters
-    pagination.value.currentPage = 1;
+    sharedState.pagination.currentPage = 1;
   };
 
   // Set sort criteria
   const setSortBy = (field: string): void => {
     // If clicking the same field, toggle direction
-    if (sortBy.value.field === field) {
-      sortBy.value.direction = sortBy.value.direction === 'asc' ? 'desc' : 'asc';
+    if (sharedState.sortBy.field === field) {
+      sharedState.sortBy.direction = sharedState.sortBy.direction === 'asc' ? 'desc' : 'asc';
     } else {
       // New field, default to ascending
-      sortBy.value.field = field;
-      sortBy.value.direction = 'asc';
+      sharedState.sortBy.field = field;
+      sharedState.sortBy.direction = 'asc';
     }
   };
 
   // Pagination methods
   const goToPage = (page: number): void => {
-    if (page >= 1 && page <= pagination.value.totalPages) {
-      pagination.value.currentPage = page;
+    if (page >= 1 && page <= sharedState.pagination.totalPages) {
+      sharedState.pagination.currentPage = page;
     }
   };
 
   const nextPage = (): void => {
-    if (pagination.value.currentPage < pagination.value.totalPages) {
-      pagination.value.currentPage++;
+    if (sharedState.pagination.currentPage < sharedState.pagination.totalPages) {
+      sharedState.pagination.currentPage++;
     }
   };
 
   const prevPage = (): void => {
-    if (pagination.value.currentPage > 1) {
-      pagination.value.currentPage--;
+    if (sharedState.pagination.currentPage > 1) {
+      sharedState.pagination.currentPage--;
     }
   };
 
   const setPageSize = (size: number): void => {
-    pagination.value.pageSize = size;
-    pagination.value.totalPages = Math.ceil(pagination.value.totalItems / size);
+    sharedState.pagination.pageSize = size;
+
+    // Recalculate total pages based on filtered items count
+    if (filteredUsers.value) {
+      sharedState.pagination.totalItems = filteredUsers.value.length;
+      sharedState.pagination.totalPages = Math.ceil(filteredUsers.value.length / size);
+    }
 
     // Reset to first page when changing page size
-    pagination.value.currentPage = 1;
+    sharedState.pagination.currentPage = 1;
   };
 
   // Refresh users data
   const refreshUsers = async (): Promise<void> => {
     await refetch();
   };
+
+  // Create refs that point to the shared state for compatibility with components
+  // This ensures that components that expect refs will still work
+  const filters = computed(() => sharedState.filters);
+  const sortBy = computed(() => sharedState.sortBy);
+  const pagination = computed(() => sharedState.pagination);
 
   return {
     // Data

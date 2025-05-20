@@ -66,7 +66,7 @@
     <div class="pagination-controls" >
       <div class="pagination-info">
         Showing {{ pagination.currentPage }} of {{ pagination.totalPages }} pages
-        ({{ pagination.totalItems }} total items)
+        ({{ pagination.totalItems }} {{ isFiltered ? 'filtered' : 'total' }} items)
       </div>
 
       <div class="pagination-actions">
@@ -121,7 +121,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { computed } from 'vue';
 import { useUsers } from '@/hooks/useUsers';
 
 // Get users data and methods from the hook
@@ -136,11 +136,15 @@ const {
   goToPage,
   nextPage,
   prevPage,
-  setPageSize
+  setPageSize,
+  isFiltered
 } = useUsers();
 
-// Page size state
-const pageSize = ref<number>(pagination.value.pageSize);
+// Page size as a computed property for two-way binding
+const pageSize = computed({
+  get: () => pagination.value.pageSize,
+  set: (value: number) => setPageSize(Number(value))
+});
 
 // Calculate which page numbers to display
 const displayedPages = computed<Array<number | string>>(() => {
@@ -185,9 +189,9 @@ const sortUsers = (field: string): void => {
   setSortBy(field);
 };
 
-// Update page size
+// Update page size - now a no-op since we're using a computed property
 const updatePageSize = (): void => {
-  setPageSize(Number(pageSize.value));
+  // The computed property setter will handle this automatically
 };
 </script>
 
@@ -374,6 +378,7 @@ const updatePageSize = (): void => {
   font-size: 0.875rem;
   background-color: var(--bg-light);
   transition: all 0.2s ease;
+  color: var(--text-color);
 }
 
 .page-size-select:focus {
