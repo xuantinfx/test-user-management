@@ -18,7 +18,7 @@
       <template v-else>
         <div class="results-info">
           <p>
-            Showing {{ sortedUsers.length }} of {{ users.length }} users
+            Showing {{ paginatedUsers.length }} of {{ users.length }} users
             <span v-if="isFiltered">(filtered)</span>
           </p>
           <button
@@ -38,7 +38,7 @@
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
 import { ref } from 'vue';
 import { useUsers } from '../hooks/useUsers';
 import UserFilter from '../components/users/UserFilter.vue';
@@ -46,53 +46,31 @@ import UserTable from '../components/users/UserTable.vue';
 import LoadingSpinner from '../components/ui/LoadingSpinner.vue';
 import ErrorAlert from '../components/ui/ErrorAlert.vue';
 
-export default {
-  name: 'UserDashboard',
-  components: {
-    UserFilter,
-    UserTable,
-    LoadingSpinner,
-    ErrorAlert
-  },
-  setup() {
-    const refreshing = ref(false);
+const refreshing = ref<boolean>(false);
 
-    // Use the users hook
-    const {
-      users,
-      sortedUsers,
-      isLoading,
-      isError,
-      error,
-      isFiltered,
-      refreshUsers: refetchUsers
-    } = useUsers();
+// Use the users hook
+const {
+  users,
+  paginatedUsers,
+  sortedUsers,
+  isLoading,
+  isError,
+  error,
+  isFiltered,
+  refreshUsers: refetchUsers
+} = useUsers();
 
-    // Refresh user data with loading state
-    const refreshUsers = async () => {
-      refreshing.value = true;
-      await refetchUsers();
-      refreshing.value = false;
-    };
+// Refresh user data with loading state
+const refreshUsers = async (): Promise<void> => {
+  refreshing.value = true;
+  await refetchUsers();
+  refreshing.value = false;
+};
 
-    // Dismiss error message
-    const dismissError = () => {
-      error.value = null;
-    };
-
-    return {
-      users,
-      sortedUsers,
-      isLoading,
-      isError,
-      error,
-      isFiltered,
-      refreshUsers,
-      refreshing,
-      dismissError
-    };
-  }
-}
+// Dismiss error message
+const dismissError = (): void => {
+  error.value = null;
+};
 </script>
 
 <style scoped>

@@ -24,40 +24,27 @@
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
 import { useRoute } from 'vue-router';
 import { useUser } from '../hooks/useUser';
 import UserCard from '../components/users/UserCard.vue';
 import LoadingSpinner from '../components/ui/LoadingSpinner.vue';
 import ErrorAlert from '../components/ui/ErrorAlert.vue';
+import { computed } from 'vue';
 
-export default {
-  name: 'UserDetails',
-  components: {
-    UserCard,
-    LoadingSpinner,
-    ErrorAlert
-  },
-  setup() {
-    const route = useRoute();
-    const userId = parseInt(route.params.id);
+const route = useRoute();
+const userId = parseInt(route.params.id as string);
 
-    // Use the user hook to fetch user data
-    const {
-      user,
-      isLoading,
-      error,
-      dismissError
-    } = useUser(userId);
+// Use the user hook to fetch user data
+const {
+  user,
+  isLoading,
+  error,
+  dismissError
+} = useUser(userId);
 
-    return {
-      user,
-      loading: isLoading,
-      error,
-      dismissError
-    };
-  }
-}
+// Rename isLoading to loading for template usage
+const loading = computed(() => isLoading.value);
 </script>
 
 <style scoped>

@@ -131,6 +131,7 @@ input {
   font-size: 0.875rem;
   transition: all 0.2s ease;
   background-color: var(--bg-light);
+  height: 34px;
 }
 
 input:hover {
@@ -153,7 +154,7 @@ input:focus {
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-  height: 38px;
+  height: 34px;
   display: inline-flex;
   align-items: center;
   justify-content: center;

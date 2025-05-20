@@ -11,10 +11,8 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'NotFound'
-}
+<script setup lang="ts">
+// No additional setup needed for this simple component
 </script>
 
 <style scoped>

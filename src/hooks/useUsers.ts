@@ -37,9 +37,6 @@ export function useUsers() {
     totalPages: 0
   });
 
-  // Query client for refetching
-  useQueryClient();
-
   // Fetch users query
   const {
     data: users,
