@@ -492,32 +492,128 @@ npm run preview
 
 ## Testing
 
-### Manual Testing
+### Testing Framework
 
-1. **Filter Testing**:
-   - Enter text in filter fields to verify filtering works correctly
-   - Test case sensitivity and partial matches
-   - Clear filters and verify all data returns
+This project uses **Vitest** as the testing framework with the following supporting libraries:
 
-2. **Sort Testing**:
-   - Click column headers to sort by different fields
-   - Click again to toggle sort direction
-   - Verify sort works correctly for different data types
+- **@vue/test-utils**: For mounting and interacting with Vue components
+- **happy-dom**: For providing a lightweight DOM implementation in tests
+- **vitest**: For test running, assertions, and mocking capabilities
 
-3. **Responsive Testing**:
-   - Resize browser window to test responsive layouts
-   - Use browser dev tools to test on different device sizes
-   - Verify all features work on mobile view
+We chose Vitest for its seamless integration with our Vite-based project, excellent Vue 3 and TypeScript support, and performance benefits from native ESM support.
 
-### Automated Testing (Future Implementation)
+### Running Tests
+
+The following npm scripts are configured for running tests:
 
 ```bash
-# Run unit tests
-npm run test:unit
+# Run all tests once
+npm run test
 
-# Run end-to-end tests
-npm run test:e2e
+# Run tests in watch mode (for development)
+npm run test:watch
+
+# Run tests with coverage report
+npm run test:coverage
 ```
+
+### Implemented Tests
+
+We have implemented tests for two UI components and one composable function:
+
+#### LoadingSpinner.vue Tests
+
+The LoadingSpinner component tests (`tests/components/ui/LoadingSpinner.spec.ts`) verify:
+
+- **Default Props**: Component renders correctly with the default "Loading..." message and without overlay class
+- **Custom Message**: Component displays a custom message when the `message` prop is provided
+- **Overlay Mode**: Component applies the `overlay` class when the `overlay` prop is set to true
+- **Empty Message**: Message element is not rendered when an empty message string is provided
+
+Example test:
+
+```typescript
+it('applies overlay class when overlay prop is true', () => {
+  const wrapper = mount(LoadingSpinner, {
+    props: {
+      overlay: true
+    }
+  });
+
+  expect(wrapper.classes()).toContain('overlay');
+});
+```
+
+#### ErrorAlert.vue Tests
+
+The ErrorAlert component tests (`tests/components/ui/ErrorAlert.spec.ts`) verify:
+
+- **Conditional Rendering**: Component is not visible when the message prop is empty
+- **Error Message Display**: Component correctly displays the provided error message
+- **Alert Types**: Component applies the correct CSS class based on the type prop (error, warning, info)
+- **Dismiss Event**: Component emits a `dismiss` event when the dismiss button is clicked
+- **Conditional Dismiss Button**: Dismiss button is only shown when the `dismissible` prop is true
+
+Example test:
+
+```typescript
+it('emits dismiss event when dismiss button is clicked', async () => {
+  const wrapper = mount(ErrorAlert, {
+    props: {
+      message: 'Dismissible alert',
+      dismissible: true
+    }
+  });
+
+  await wrapper.find('.dismiss-btn').trigger('click');
+
+  expect(wrapper.emitted()).toHaveProperty('dismiss');
+  expect(wrapper.emitted('dismiss')).toHaveLength(1);
+});
+```
+
+#### useTheme.ts Tests
+
+The useTheme composable tests (`tests/hooks/useTheme.spec.ts`) verify:
+
+- **Default Theme**: Hook initializes with the light theme by default
+- **Theme Toggling**: The `toggleTheme` function correctly switches between light and dark themes
+- **Theme Setting**: The `setTheme` function correctly sets a specific theme
+
+For these tests, we mock the composable to isolate it from browser APIs (localStorage, document, etc.) and focus on testing the core functionality.
+
+Example test:
+
+```typescript
+it('toggles theme correctly', async () => {
+  const { theme, isDark, toggleTheme } = useTheme();
+
+  // Start with light theme
+  expect(theme.value).toBe('light');
+  expect(isDark.value).toBe(false);
+
+  // Toggle to dark theme
+  toggleTheme();
+  await nextTick();
+
+  expect(theme.value).toBe('dark');
+  expect(isDark.value).toBe(true);
+});
+```
+
+### Testing Approach
+
+Our testing approach focuses on:
+
+1. **Component Testing**: Verifying that components render correctly with different props and emit expected events
+2. **Composable Testing**: Verifying that composable functions manage state correctly and provide expected functionality
+3. **Isolation**: Using mocks to isolate components and composables from external dependencies
+
+Each test follows a consistent pattern:
+
+- Setup the component or composable with specific props or conditions
+- Perform actions when testing interactive behavior
+- Assert that the expected outcome occurs
 
 ## Future Enhancements
 
@@ -567,6 +663,13 @@ user-dashboard/
 │   ├── App.vue          # Root component with theme CSS variables
 │   ├── main.ts          # Application entry point with theme initialization
 │   └── shims-vue.d.ts   # Vue TypeScript declarations
+├── tests/               # Test files
+│   ├── components/      # Component tests
+│   │   └── ui/          # UI component tests
+│   │       ├── ErrorAlert.spec.ts      # Tests for ErrorAlert component
+│   │       └── LoadingSpinner.spec.ts  # Tests for LoadingSpinner component
+│   └── hooks/           # Hook tests
+│       └── useTheme.spec.ts            # Tests for useTheme composable
 ├── .env                 # Environment variables
 ├── .gitignore
 ├── index.html
@@ -574,5 +677,6 @@ user-dashboard/
 ├── README.md
 ├── tsconfig.json        # TypeScript configuration
 ├── tsconfig.node.json   # TypeScript Node configuration
+├── vitest.config.ts     # Vitest configuration
 └── vite.config.ts       # Vite configuration
 ```
