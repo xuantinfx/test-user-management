@@ -35,6 +35,7 @@ TODO: show all screenshots of the app, include: user management, error handling 
 ## Technology Stack
 
 - **Vue 3**: Latest version of the Vue.js framework with Composition API
+- **TypeScript**: Static typing for improved developer experience, code quality, and maintainability
 - **Vite**: Next-generation frontend tooling for faster development and optimized builds
 - **Vue Router 4**: Official router for Vue.js with improved TypeScript support
 - **TanStack Query (Vue Query)**: Data fetching and state management library
@@ -74,24 +75,38 @@ The application follows a clean, maintainable architecture based on several desi
 - **Reactive Data Flow**: One-way data flow with reactive state updates
 - **Computed Properties**: Efficient derived state calculations
 
+### TypeScript Integration
+
+- **Strong Typing**: Comprehensive type definitions for all data structures and functions
+- **Type Safety**: Catch errors at compile time rather than runtime
+- **Interface Definitions**: Clear contracts for component props, API responses, and state
+- **Type Inference**: Leveraging TypeScript's ability to infer types when possible
+- **Generics**: Used for reusable, type-safe components and functions
+
 ## Key Features Implementation
 
 ### Filtering System
 
 The filtering system allows users to filter the displayed data by multiple criteria simultaneously:
 
-```javascript
-// Filtering implementation in useUsers.js hook
-const filteredUsers = computed(() => {
+```typescript
+// Filtering implementation in useUsers.ts hook
+const filteredUsers: ComputedRef<User[]> = computed(() => {
   if (!users.value || users.value.length === 0) return [];
 
-  return users.value.filter(user => {
+  const filtered = users.value.filter(user => {
     const nameMatch = user.name.toLowerCase().includes(filters.value.name.toLowerCase());
     const emailMatch = user.email.toLowerCase().includes(filters.value.email.toLowerCase());
     const companyMatch = user.company.name.toLowerCase().includes(filters.value.company.toLowerCase());
 
     return nameMatch && emailMatch && companyMatch;
   });
+
+  // Update pagination totals
+  pagination.value.totalItems = filtered.length;
+  pagination.value.totalPages = Math.ceil(filtered.length / pagination.value.pageSize);
+
+  return filtered;
 });
 ```
 
@@ -106,21 +121,21 @@ Key aspects:
 
 The sorting system allows users to sort by any column with direction toggle:
 
-```javascript
-// Sorting implementation in useUsers.js hook
-const sortedUsers = computed(() => {
+```typescript
+// Sorting implementation in useUsers.ts hook
+const sortedUsers: ComputedRef<User[]> = computed(() => {
   if (!filteredUsers.value || filteredUsers.value.length === 0) return [];
 
   return [...filteredUsers.value].sort((a, b) => {
-    let fieldA, fieldB;
+    let fieldA: any, fieldB: any;
 
     // Handle nested fields like company.name
     if (sortBy.value.field === 'company') {
       fieldA = a.company.name;
       fieldB = b.company.name;
     } else {
-      fieldA = a[sortBy.value.field];
-      fieldB = b[sortBy.value.field];
+      fieldA = a[sortBy.value.field as keyof User];
+      fieldB = b[sortBy.value.field as keyof User];
     }
 
     // Case insensitive string comparison
@@ -149,9 +164,9 @@ Key aspects:
 
 The pagination system efficiently handles large datasets by dividing them into manageable pages:
 
-```javascript
-// Pagination implementation in useUsers.js hook
-const paginatedUsers = computed(() => {
+```typescript
+// Pagination implementation in useUsers.ts hook
+const paginatedUsers: ComputedRef<User[]> = computed(() => {
   if (!sortedUsers.value || sortedUsers.value.length === 0) return [];
 
   const startIndex = (pagination.value.currentPage - 1) * pagination.value.pageSize;
@@ -295,6 +310,18 @@ Key aspects:
 - Created reusable error components with retry functionality
 - Implemented graceful degradation when parts of the application fail
 
+### Challenge 6: TypeScript Integration
+
+**Problem**: Implementing TypeScript in an existing JavaScript codebase while maximizing type safety benefits.
+
+**Solution**:
+
+- Created comprehensive interface definitions for all data structures
+- Implemented proper typing for Vue components using `defineProps` and `defineEmits`
+- Used TypeScript generics for reusable components and functions
+- Added explicit return types for all functions and computed properties
+- Implemented type guards for conditional logic
+
 ## Getting Started
 
 ### Prerequisites
@@ -323,7 +350,10 @@ The application will be available at `http://localhost:5173/`
 ### Building for Production
 
 ```bash
-# Build the application
+# Type check the application
+npm run type-check
+
+# Build the application (includes type checking)
 npm run build
 
 # Preview the production build
@@ -396,12 +426,17 @@ user-dashboard/
 │   ├── plugins/         # Vue plugins configuration
 │   ├── router/          # Vue Router configuration
 │   ├── services/        # API services
+│   ├── types/           # TypeScript type definitions
 │   ├── views/           # Page components
 │   ├── App.vue          # Root component
-│   └── main.js          # Application entry point
+│   ├── main.ts          # Application entry point
+│   └── shims-vue.d.ts   # Vue TypeScript declarations
+├── .env                 # Environment variables
 ├── .gitignore
 ├── index.html
 ├── package.json
 ├── README.md
-└── vite.config.js
+├── tsconfig.json        # TypeScript configuration
+├── tsconfig.node.json   # TypeScript Node configuration
+└── vite.config.ts       # Vite configuration
 ```
