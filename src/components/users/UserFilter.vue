@@ -71,24 +71,44 @@ const updateFilters = (): void => {
 
 <style scoped>
 .filter-container {
-  background-color: #f9fafb;
+  background-color: var(--bg-dark);
   border-radius: 8px;
-  padding: 1.5rem;
-  margin-bottom: 2rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: var(--space-lg);
+  margin-bottom: var(--space-xl);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  border: 1px solid var(--border-color);
+}
+
+.filter-container:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
 }
 
 h2 {
   margin-top: 0;
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-md);
   font-size: 1.25rem;
-  color: #374151;
+  color: var(--text-color);
+  position: relative;
+  display: inline-block;
+}
+
+h2::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 40px;
+  height: 3px;
+  background-color: var(--primary-color);
+  border-radius: 1.5px;
 }
 
 .filter-form {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 1rem;
+  gap: var(--space-md);
   align-items: end;
 }
 
@@ -99,43 +119,82 @@ h2 {
 
 label {
   font-size: 0.875rem;
-  margin-bottom: 0.5rem;
-  color: #4b5563;
+  margin-bottom: var(--space-sm);
+  color: var(--text-light);
+  font-weight: 500;
 }
 
 input {
-  padding: 0.5rem 0.75rem;
-  border: 1px solid #d1d5db;
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--border-color);
   border-radius: 4px;
   font-size: 0.875rem;
-  transition: border-color 0.2s;
+  transition: all 0.2s ease;
+  background-color: var(--bg-light);
+}
+
+input:hover {
+  border-color: var(--border-dark);
 }
 
 input:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
 }
 
 .clear-btn {
-  background-color: #ef4444;
+  background-color: var(--danger-color);
   color: white;
   border: none;
   border-radius: 4px;
-  padding: 0.5rem 1rem;
+  padding: var(--space-sm) var(--space-md);
   font-size: 0.875rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s ease;
   height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .clear-btn:hover {
-  background-color: #dc2626;
+  background-color: var(--danger-dark);
+  transform: translateY(-1px);
+}
+
+.clear-btn:active {
+  transform: translateY(0);
+}
+
+/* Responsive styles */
+@media (max-width: 1024px) {
+  .filter-form {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
 }
 
 @media (max-width: 768px) {
+  .filter-container {
+    padding: var(--space-md);
+    margin-bottom: var(--space-lg);
+  }
+
+  .filter-form {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-sm);
+  }
+}
+
+@media (max-width: 640px) {
   .filter-form {
     grid-template-columns: 1fr;
+  }
+
+  .clear-btn {
+    margin-top: var(--space-xs);
+    width: 100%;
   }
 }
 </style>

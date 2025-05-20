@@ -23,48 +23,117 @@ export default {
   align-items: center;
   justify-content: center;
   min-height: 80vh;
-  padding: 2rem;
+  padding: var(--space-xl);
+  animation: fadeIn 0.5s ease-in-out;
 }
 
 .not-found-content {
   text-align: center;
   max-width: 500px;
-  padding: 3rem 2rem;
-  background-color: white;
+  padding: var(--space-xl) var(--space-lg);
+  background-color: var(--bg-light);
   border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md);
+  transition: all 0.3s ease;
+  border: 1px solid var(--border-color);
+}
+
+.not-found-content:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-3px);
 }
 
 h1 {
   font-size: 6rem;
   margin: 0;
-  color: #ef4444;
+  color: var(--danger-color);
   line-height: 1;
+  font-weight: 800;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.1);
 }
 
 h2 {
   font-size: 1.5rem;
-  margin: 0.5rem 0 1.5rem;
-  color: #1f2937;
+  margin: var(--space-sm) 0 var(--space-lg);
+  color: var(--text-color);
+  font-weight: 600;
 }
 
 p {
-  color: #6b7280;
-  margin-bottom: 2rem;
+  color: var(--text-light);
+  margin-bottom: var(--space-lg);
+  font-size: 1rem;
 }
 
 .home-btn {
   display: inline-block;
-  background-color: #3b82f6;
+  background-color: var(--primary-color);
   color: white;
-  padding: 0.75rem 1.5rem;
+  padding: var(--space-sm) var(--space-lg);
   border-radius: 4px;
   text-decoration: none;
   font-weight: 500;
-  transition: background-color 0.2s;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
 }
 
 .home-btn:hover {
-  background-color: #2563eb;
+  background-color: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.home-btn:active {
+  transform: translateY(0);
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .not-found-page {
+    padding: var(--space-lg);
+  }
+
+  .not-found-content {
+    padding: var(--space-lg) var(--space-md);
+  }
+
+  h1 {
+    font-size: 5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .not-found-page {
+    padding: var(--space-md);
+  }
+
+  .not-found-content {
+    padding: var(--space-md);
+    max-width: 100%;
+  }
+
+  h1 {
+    font-size: 4rem;
+  }
+
+  h2 {
+    font-size: 1.25rem;
+  }
+
+  .home-btn {
+    width: 100%;
+    padding: var(--space-md);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 </style>

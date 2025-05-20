@@ -44,33 +44,46 @@ defineEmits<{
 .error-alert {
   display: flex;
   align-items: flex-start;
-  padding: 0.75rem 1rem;
-  border-radius: 4px;
-  margin-bottom: 1rem;
+  padding: var(--space-md);
+  border-radius: 8px;
+  margin-bottom: var(--space-md);
   animation: fadeIn 0.3s ease-in-out;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+}
+
+.error-alert:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
 }
 
 .error {
-  background-color: #fee2e2;
-  border: 1px solid #ef4444;
-  color: #b91c1c;
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 1px solid var(--danger-color);
+  color: var(--danger-dark);
 }
 
 .warning {
-  background-color: #fef3c7;
-  border: 1px solid #f59e0b;
-  color: #b45309;
+  background-color: rgba(245, 158, 11, 0.1);
+  border: 1px solid var(--warning-color);
+  color: var(--warning-dark);
 }
 
 .info {
-  background-color: #e0f2fe;
-  border: 1px solid #38bdf8;
-  color: #0369a1;
+  background-color: rgba(59, 130, 246, 0.1);
+  border: 1px solid var(--info-color);
+  color: var(--info-dark);
 }
 
 .error-icon {
-  margin-right: 0.75rem;
+  margin-right: var(--space-md);
   flex-shrink: 0;
+}
+
+.error-icon svg {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
 }
 
 .error-content {
@@ -82,20 +95,33 @@ defineEmits<{
 
 .error-content p {
   margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
 }
 
 .dismiss-btn {
   background: transparent;
   border: none;
   cursor: pointer;
-  padding: 0;
-  margin-left: 0.5rem;
+  padding: var(--space-xs);
+  margin-left: var(--space-sm);
   opacity: 0.7;
-  transition: opacity 0.2s;
+  transition: all 0.2s ease;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .dismiss-btn:hover {
   opacity: 1;
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.dismiss-btn svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
 }
 
 @keyframes fadeIn {
@@ -106,6 +132,24 @@ defineEmits<{
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* Responsive styles */
+@media (max-width: 640px) {
+  .error-alert {
+    padding: var(--space-sm);
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .error-icon {
+    margin-right: 0;
+    margin-bottom: var(--space-sm);
+  }
+
+  .error-content {
+    width: 100%;
   }
 }
 </style>

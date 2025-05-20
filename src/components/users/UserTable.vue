@@ -195,9 +195,15 @@ const updatePageSize = (): void => {
 .user-table-container {
   overflow-x: auto;
   border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md);
   display: flex;
   flex-direction: column;
+  background-color: var(--bg-light);
+  transition: box-shadow 0.3s ease;
+}
+
+.user-table-container:hover {
+  box-shadow: var(--shadow-lg);
 }
 
 .user-table {
@@ -209,72 +215,86 @@ const updatePageSize = (): void => {
 }
 
 .user-table th {
-  background-color: #f3f4f6;
-  padding: 0.75rem 1rem;
+  background-color: var(--bg-dark);
+  padding: var(--space-md);
   font-weight: 600;
-  color: #374151;
-  border-bottom: 1px solid #e5e7eb;
+  color: var(--text-color);
+  border-bottom: 1px solid var(--border-color);
   cursor: pointer;
   user-select: none;
   position: relative;
-  transition: background-color 0.2s;
+  transition: all 0.2s ease;
 }
 
 .user-table th:hover {
-  background-color: #e5e7eb;
+  background-color: var(--border-color);
 }
 
 .user-table th.active {
-  background-color: #dbeafe;
-  color: #1e40af;
+  background-color: rgba(79, 70, 229, 0.1);
+  color: var(--primary-color);
 }
 
 .sort-icon {
-  margin-left: 0.25rem;
+  margin-left: var(--space-xs);
   display: inline-block;
+  font-weight: bold;
 }
 
 .user-table td {
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid #e5e7eb;
-  color: #4b5563;
+  padding: var(--space-md);
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-light);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
+.user-table tbody tr {
+  transition: background-color 0.2s ease;
+}
+
 .user-table tbody tr:hover {
-  background-color: #f9fafb;
+  background-color: var(--bg-dark);
 }
 
 .user-table a {
-  color: #3b82f6;
+  color: var(--primary-color);
   text-decoration: none;
+  transition: color 0.2s ease;
 }
 
 .user-table a:hover {
+  color: var(--primary-dark);
   text-decoration: underline;
 }
 
 .view-btn {
   display: inline-block;
-  background-color: #3b82f6;
+  background-color: var(--primary-color);
   color: white;
-  padding: 0.375rem 0.75rem;
+  padding: var(--space-xs) var(--space-sm);
   border-radius: 4px;
   font-size: 0.75rem;
+  font-weight: 500;
   text-decoration: none;
-  transition: background-color 0.2s;
+  transition: all 0.2s ease;
 }
 
 .view-btn:hover {
-  background-color: #2563eb;
+  background-color: var(--primary-dark);
+  transform: translateY(-1px);
+}
+
+.view-btn:active {
+  transform: translateY(0);
 }
 
 .no-results {
   text-align: center;
-  padding: 2rem;
-  color: #6b7280;
+  padding: var(--space-xl);
+  color: var(--text-light);
+  font-style: italic;
 }
 
 /* Pagination Controls */
@@ -282,49 +302,53 @@ const updatePageSize = (): void => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem;
-  background-color: #f9fafb;
-  border-top: 1px solid #e5e7eb;
+  padding: var(--space-md);
+  background-color: var(--bg-dark);
+  border-top: 1px solid var(--border-color);
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: var(--space-md);
 }
 
 .pagination-info {
-  color: #6b7280;
+  color: var(--text-light);
   font-size: 0.875rem;
 }
 
 .pagination-actions {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-xs);
 }
 
 .pagination-pages {
   display: flex;
-  gap: 0.25rem;
+  gap: var(--space-xs);
 }
 
 .pagination-btn {
-  background-color: #ffffff;
-  border: 1px solid #d1d5db;
-  color: #4b5563;
-  padding: 0.375rem 0.75rem;
+  background-color: var(--bg-light);
+  border: 1px solid var(--border-color);
+  color: var(--text-light);
+  padding: var(--space-xs) var(--space-sm);
   border-radius: 4px;
   font-size: 0.875rem;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
+  min-width: 32px;
+  text-align: center;
 }
 
 .pagination-btn:hover:not(:disabled) {
-  background-color: #f3f4f6;
-  border-color: #9ca3af;
+  background-color: var(--bg-dark);
+  border-color: var(--border-dark);
+  color: var(--text-color);
 }
 
 .pagination-btn.active {
-  background-color: #3b82f6;
-  border-color: #3b82f6;
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
   color: white;
+  font-weight: 600;
 }
 
 .pagination-btn:disabled {
@@ -335,43 +359,55 @@ const updatePageSize = (): void => {
 .page-size-selector {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-sm);
 }
 
 .page-size-selector label {
-  color: #6b7280;
+  color: var(--text-light);
   font-size: 0.875rem;
 }
 
 .page-size-select {
-  padding: 0.375rem 0.5rem;
-  border: 1px solid #d1d5db;
+  padding: var(--space-xs) var(--space-sm);
+  border: 1px solid var(--border-color);
   border-radius: 4px;
   font-size: 0.875rem;
-  background-color: white;
+  background-color: var(--bg-light);
+  transition: all 0.2s ease;
+}
+
+.page-size-select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
 }
 
 /* Responsive styles */
+@media (max-width: 1024px) {
+  .user-table th, .user-table td {
+    padding: var(--space-sm);
+  }
+}
+
 @media (max-width: 768px) {
   .user-table th, .user-table td {
-    padding: 0.5rem;
+    padding: var(--space-xs) var(--space-sm);
   }
 
   .user-table {
     font-size: 0.75rem;
   }
 
-  /* Hide less important columns on mobile */
+  /* Hide less important columns on medium screens */
   .user-table th:nth-child(3),
-  .user-table td:nth-child(3),
-  .user-table th:nth-child(5),
-  .user-table td:nth-child(5) {
+  .user-table td:nth-child(3) {
     display: none;
   }
 
   .pagination-controls {
     flex-direction: column;
     align-items: flex-start;
+    gap: var(--space-sm);
   }
 
   .pagination-actions {
@@ -379,5 +415,88 @@ const updatePageSize = (): void => {
     justify-content: center;
     order: -1;
   }
+
+  .page-size-selector {
+    align-self: flex-end;
+  }
+}
+
+@media (max-width: 640px) {
+  /* Hide more columns on small screens */
+  .user-table th:nth-child(5),
+  .user-table td:nth-child(5) {
+    display: none;
+  }
+
+  .pagination-pages {
+    overflow-x: auto;
+    max-width: 200px;
+    padding-bottom: var(--space-xs);
+  }
+
+  .page-size-selector {
+    width: 100%;
+    justify-content: space-between;
+    margin-top: var(--space-xs);
+  }
+
+  .pagination-info {
+    width: 100%;
+    text-align: center;
+    order: -2;
+  }
+}
+
+/* Card view for very small screens */
+@media (max-width: 480px) {
+  .user-table thead {
+    display: none;
+  }
+
+  .user-table,
+  .user-table tbody,
+  .user-table tr,
+  .user-table td {
+    display: block;
+    width: 100%;
+    text-align: left;
+  }
+
+  .user-table tr {
+    margin-bottom: var(--space-md);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .user-table td {
+    position: relative;
+    padding-left: 40%;
+    white-space: normal;
+  }
+
+  .user-table td:before {
+    position: absolute;
+    left: var(--space-sm);
+    width: 35%;
+    font-weight: 600;
+    color: var(--text-color);
+  }
+
+  /* Add labels for each cell */
+  .user-table td:nth-child(1):before { content: "ID:"; }
+  .user-table td:nth-child(2):before { content: "Name:"; }
+  .user-table td:nth-child(4):before { content: "Email:"; }
+  .user-table td:nth-child(6):before { content: "Actions:"; }
+
+  /* Show all cells in card view */
+  .user-table td:nth-child(3),
+  .user-table td:nth-child(5) {
+    display: block;
+    padding-left: 40%;
+  }
+
+  .user-table td:nth-child(3):before { content: "Username:"; }
+  .user-table td:nth-child(5):before { content: "Company:"; }
 }
 </style>

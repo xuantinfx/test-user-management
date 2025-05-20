@@ -25,7 +25,8 @@ withDefaults(defineProps<LoadingSpinnerProps>(), {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
+  padding: var(--space-md);
+  animation: fadeIn 0.3s ease-in-out;
 }
 
 .loading-spinner.overlay {
@@ -34,28 +35,53 @@ withDefaults(defineProps<LoadingSpinnerProps>(), {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(255, 255, 255, 0.8);
+  background-color: rgba(255, 255, 255, 0.9);
   z-index: 1000;
+  backdrop-filter: blur(3px);
 }
 
 .spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid rgba(0, 0, 0, 0.1);
+  border: 4px solid rgba(79, 70, 229, 0.1);
   border-radius: 50%;
-  border-top-color: #3498db;
+  border-top-color: var(--primary-color);
   animation: spin 1s ease-in-out infinite;
+  box-shadow: var(--shadow-sm);
 }
 
 .message {
-  margin-top: 0.5rem;
-  color: #666;
+  margin-top: var(--space-sm);
+  color: var(--text-light);
   font-size: 0.9rem;
+  font-weight: 500;
 }
 
 @keyframes spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Responsive styles */
+@media (max-width: 640px) {
+  .spinner {
+    width: 32px;
+    height: 32px;
+    border-width: 3px;
+  }
+
+  .message {
+    font-size: 0.8rem;
   }
 }
 </style>

@@ -64,51 +64,115 @@ export default {
 .user-details-page {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem 1rem;
+  padding: var(--space-xl) var(--space-md);
+  animation: fadeIn 0.5s ease-in-out;
 }
 
 .loading-container {
   display: flex;
   justify-content: center;
-  padding: 3rem;
+  padding: var(--space-xl);
+}
+
+.user-details-content {
+  transition: all 0.3s ease;
 }
 
 .not-found {
   text-align: center;
-  padding: 3rem;
-  background-color: white;
+  padding: var(--space-xl);
+  background-color: var(--bg-light);
   border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md);
+  transition: all 0.3s ease;
+  border: 1px solid var(--border-color);
+}
+
+.not-found:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
 }
 
 .not-found h2 {
-  color: #ef4444;
+  color: var(--danger-color);
   margin-top: 0;
+  font-size: 1.5rem;
+  margin-bottom: var(--space-md);
 }
 
 .not-found p {
-  color: #6b7280;
-  margin-bottom: 2rem;
+  color: var(--text-light);
+  margin-bottom: var(--space-lg);
+  font-size: 1rem;
+  line-height: 1.5;
 }
 
 .back-btn {
   display: inline-block;
-  background-color: #6b7280;
+  background-color: var(--text-light);
   color: white;
-  padding: 0.5rem 1rem;
+  padding: var(--space-sm) var(--space-md);
   border-radius: 4px;
   text-decoration: none;
   font-size: 0.875rem;
-  transition: background-color 0.2s;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
 }
 
 .back-btn:hover {
-  background-color: #4b5563;
+  background-color: var(--text-color);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.back-btn:active {
+  transform: translateY(0);
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .user-details-page {
+    padding: var(--space-lg) var(--space-md);
+  }
+
+  .loading-container {
+    padding: var(--space-lg);
+  }
+
+  .not-found {
+    padding: var(--space-lg);
+  }
 }
 
 @media (max-width: 640px) {
   .user-details-page {
-    padding: 1rem;
+    padding: var(--space-md);
+  }
+
+  .loading-container {
+    padding: var(--space-md);
+  }
+
+  .not-found {
+    padding: var(--space-md);
+  }
+
+  .back-btn {
+    width: 100%;
+    text-align: center;
+    padding: var(--space-md);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 </style>
