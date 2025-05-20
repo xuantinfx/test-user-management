@@ -64,6 +64,14 @@ A production-ready, responsive Vue.js application that fetches and displays user
   </div>
 </div>
 
+#### API call Error
+<div style="display: flex; gap: 20px; justify-content: center;">
+  <div>
+    <p align="center"><strong>Desktop View</strong></p>
+    <img src="screenshots/api-call-error.png" alt="API Error - Light Theme"/>
+  </div>
+</div>
+
 ## Table of Contents
 
 - [Screenshots](#screenshots)
@@ -446,70 +454,465 @@ The theme toggle component is designed with accessibility in mind:
 
 ## Technical Challenges and Solutions
 
-### Challenge 1: Complex Filtering and Sorting Logic
+### 1. Complex State Management with TanStack Query
 
-**Problem**: Implementing efficient filtering and sorting for potentially large datasets while maintaining responsive UI.
-
-**Solution**:
-
-- Implemented computed properties in Vue Query hooks for derived data
-- Used memoization techniques to prevent recalculation when inputs haven't changed
-- Applied debouncing for filter inputs to reduce computation frequency
-
-### Challenge 2: Nested Data Handling
-
-**Problem**: The API returns complex nested objects that need special handling for display and sorting.
+**Problem**: Managing application state, server data, caching, and synchronization across components while maintaining performance and reactivity.
 
 **Solution**:
 
-- Created specialized getter functions that handle nested property access
-- Implemented custom comparators for sorting that understand object structures
-- Used recursive component patterns for displaying nested data
+- **Singleton Pattern for Shared State**: Implemented a singleton pattern in the `useUsers` hook to ensure consistent state across components:
+  ```typescript
+  // Create a shared state that will be used across all components
+  const sharedState = {
+    filters: reactive<UserFilters>({...}),
+    sortBy: reactive<SortCriteria>({...}),
+    pagination: reactive<Pagination>({...}),
+    queryInstance: null as any,
+    initialized: false
+  };
+  ```
 
-### Challenge 3: Responsive Design for Complex Tables
+- **Query Key Management**: Created a hierarchical query key structure for efficient cache invalidation and updates:
+  ```typescript
+  // Query keys for caching and invalidation
+  export const userKeys = {
+    all: ['users'] as const,
+    lists: () => [...userKeys.all, 'list'] as const,
+    detail: (id: number) => [...userKeys.all, 'detail', id] as const
+  };
+  ```
 
-**Problem**: Tables are notoriously difficult to make responsive across all device sizes.
+- **Computed Properties Chain**: Implemented a chain of computed properties for data transformation that only recalculate when dependencies change:
+  ```typescript
+  // Chain of computed properties for data transformation
+  const filteredUsers = computed(() => {...});
+  const sortedUsers = computed(() => {...});
+  const paginatedUsers = computed(() => {...});
+  ```
+
+- **Stale-While-Revalidate Pattern**: Configured TanStack Query to show cached data while fetching fresh data in the background:
+  ```typescript
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        refetchOnWindowFocus: false,
+        retry: 1,
+        staleTime: 5 * 60 * 1000, // 5 minutes
+      },
+    },
+  });
+  ```
+
+### 2. Responsive Design Implementation Challenges
+
+**Problem**: Creating a consistent user experience across devices with complex UI components like tables, forms, and navigation.
 
 **Solution**:
 
-- Implemented horizontal scrolling for tables on small screens
-- Used CSS Grid for adaptive layouts
-- Created alternative card views for very small screens
-- Applied strategic column hiding based on screen size
+- **Mobile-First CSS Grid System**: Implemented a responsive grid system that adapts to different screen sizes:
+  ```css
+  .filter-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+    align-items: end;
+  }
 
-### Challenge 4: Handling Large Datasets
+  @media (max-width: 768px) {
+    .filter-form {
+      grid-template-columns: 1fr;
+    }
+  }
+  ```
 
-**Problem**: Rendering large amounts of user data efficiently without compromising performance or user experience.
+- **Responsive Table Alternative**: Created card-based views for tables on mobile devices:
+  ```css
+  @media (max-width: 640px) {
+    .table-container {
+      overflow-x: auto;
+    }
+
+    .user-card-view {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .desktop-only {
+      display: none;
+    }
+  }
+  ```
+
+- **Fluid Typography**: Used relative units for typography to ensure readability across devices:
+  ```css
+  :root {
+    font-size: 16px;
+  }
+
+  h1 {
+    font-size: 1.75rem;
+  }
+
+  @media (max-width: 768px) {
+    h1 {
+      font-size: 1.5rem;
+    }
+  }
+  ```
+
+- **Container Width Management**: Implemented container width constraints for optimal readability on large screens:
+  ```css
+  .container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--space-md);
+  }
+
+  @media (min-width: 1400px) {
+    .container {
+      width: 80%;
+    }
+  }
+  ```
+
+### 3. TypeScript Integration Challenges and Type Safety Solutions
+
+**Problem**: Ensuring type safety across the application while maintaining flexibility and avoiding excessive type casting.
 
 **Solution**:
 
-- Implemented client-side pagination to limit the number of DOM elements rendered at once
-- Created a flexible pagination system with customizable page sizes
-- Designed intuitive navigation controls with page numbers and prev/next buttons
-- Optimized computed properties to only process visible data
-- Added responsive design considerations for pagination controls on mobile devices
+- **Comprehensive Interface Definitions**: Created detailed type definitions for all data structures:
+  ```typescript
+  // User types
+  export interface User {
+    id: number;
+    name: string;
+    username: string;
+    email: string;
+    address: Address;
+    phone: string;
+    website: string;
+    company: Company;
+  }
 
-### Challenge 5: Error Handling and Recovery
+  export interface Address {
+    street: string;
+    suite: string;
+    city: string;
+    zipcode: string;
+    geo: Geo;
+  }
+  ```
 
-**Problem**: Creating a robust error handling system that's both informative and allows for recovery.
+- **Vue Component Props Typing**: Used TypeScript with Vue's `defineProps` for type-safe component props:
+  ```typescript
+  // Type-safe props definition
+  interface UserCardProps {
+    user: User;
+  }
+
+  const props = defineProps<UserCardProps>();
+  ```
+
+- **Generic Type Parameters**: Leveraged TypeScript generics for reusable components and functions:
+  ```typescript
+  // Generic computed ref type
+  const filteredUsers: ComputedRef<User[]> = computed(() => {
+    // Implementation
+  });
+  ```
+
+- **Type Guards for Conditional Logic**: Implemented type guards for safer conditional logic:
+  ```typescript
+  // Type guard example
+  function isValidUser(user: any): user is User {
+    return user && typeof user.id === 'number' && typeof user.name === 'string';
+  }
+  ```
+
+- **Router Type Extensions**: Extended Vue Router types for custom meta fields:
+  ```typescript
+  // Define custom meta type
+  declare module 'vue-router' {
+    interface RouteMeta {
+      title?: string;
+    }
+  }
+  ```
+
+### 4. Theme Switching Implementation Details
+
+**Problem**: Creating a seamless theme switching experience with persistent preferences, system preference detection, and smooth transitions.
 
 **Solution**:
 
-- Centralized error handling in Axios interceptors
-- Created reusable error components with retry functionality
-- Implemented graceful degradation when parts of the application fail
+- **CSS Variables for Theming**: Implemented a comprehensive CSS variable system for theme colors:
+  ```css
+  /* Light theme (default) */
+  :root[data-theme="light"] {
+    --primary-color: #4f46e5;
+    --bg-color: #f9fafb;
+    --text-color: #1f2937;
+  }
 
-### Challenge 6: TypeScript Integration
+  /* Dark theme */
+  :root[data-theme="dark"] {
+    --primary-color: #818cf8;
+    --bg-color: #111827;
+    --text-color: #f9fafb;
+  }
+  ```
 
-**Problem**: Implementing TypeScript in an existing JavaScript codebase while maximizing type safety benefits.
+- **System Preference Detection**: Used media queries to detect and respect system preferences:
+  ```typescript
+  // Check if system prefers dark mode
+  const systemPrefersDark = computed(() => {
+    if (typeof window === 'undefined') return false;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
+  ```
+
+- **Real-time Preference Monitoring**: Added event listeners to detect system preference changes:
+  ```typescript
+  // Listen for system preference changes
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+    if (!localStorage.getItem('theme')) {
+      // Only update if user hasn't manually set a preference
+      theme.value = e.matches ? 'dark' : 'light';
+    }
+  });
+  ```
+
+- **Preference Persistence**: Stored user theme preferences in localStorage:
+  ```typescript
+  // Store in localStorage for persistence
+  localStorage.setItem('theme', currentTheme);
+  ```
+
+- **Smooth Theme Transitions**: Added CSS transitions for smooth theme switching:
+  ```css
+  * {
+    transition: var(--theme-transition);
+  }
+
+  :root {
+    --theme-transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
+  }
+  ```
+
+### 5. Performance Optimizations for Large Data Sets
+
+**Problem**: Handling potentially large datasets efficiently without compromising UI responsiveness or user experience.
 
 **Solution**:
 
-- Created comprehensive interface definitions for all data structures
-- Implemented proper typing for Vue components using `defineProps` and `defineEmits`
-- Used TypeScript generics for reusable components and functions
-- Added explicit return types for all functions and computed properties
-- Implemented type guards for conditional logic
+- **Client-side Pagination**: Implemented efficient pagination to limit rendered elements:
+  ```typescript
+  // Get paginated users
+  const paginatedUsers = computed(() => {
+    if (!sortedUsers.value || sortedUsers.value.length === 0) return [];
+
+    const startIndex = (pagination.value.currentPage - 1) * pagination.value.pageSize;
+    const endIndex = startIndex + pagination.value.pageSize;
+
+    return sortedUsers.value.slice(startIndex, endIndex);
+  });
+  ```
+
+- **Computed Property Optimization**: Structured computed properties to minimize recalculations:
+  ```typescript
+  // Only filter when necessary
+  const filteredUsers = computed(() => {
+    if (!users.value || users.value.length === 0) return [];
+    if (!isFiltered.value) return users.value;
+
+    // Only perform filtering when filters are applied
+    return users.value.filter(user => {
+      // Filter implementation
+    });
+  });
+  ```
+
+- **Debounced User Inputs**: Applied debouncing to filter inputs to prevent excessive recalculations:
+  ```typescript
+  // Debounced filter input handler
+  const debouncedFilterHandler = debounce((value: string, field: keyof UserFilters) => {
+    setFilter(field, value);
+  }, 300);
+  ```
+
+- **Virtualized Rendering**: For very large datasets, implemented virtualized rendering to only render visible items:
+  ```typescript
+  // Only render items in the visible viewport
+  const visibleItems = computed(() => {
+    const start = Math.max(0, scrollPosition - buffer);
+    const end = Math.min(items.length, scrollPosition + viewportSize + buffer);
+    return items.slice(start, end);
+  });
+  ```
+
+### 6. API Configuration with Environment Variables
+
+**Problem**: Managing API configuration securely across different environments without hardcoding values.
+
+**Solution**:
+
+- **Environment-specific Configuration Files**: Created separate environment files for development and production:
+  ```
+  // .env.development
+  VITE_API_BASE_URL=https://jsonplaceholder.typicode.com
+
+  // .env.production
+  VITE_API_BASE_URL=https://jsonplaceholder.typicode.com
+  ```
+
+- **Centralized API Client**: Implemented a centralized Axios instance with environment variables:
+  ```typescript
+  // Create axios instance with base URL from environment variables
+  const apiClient: AxiosInstance = axios.create({
+    baseURL: import.meta.env.VITE_API_BASE_URL as string,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    timeout: 10000
+  });
+  ```
+
+- **Service Layer Abstraction**: Created a service layer to abstract API calls:
+  ```typescript
+  // User API service
+  export const userService = {
+    // Get all users
+    getUsers(): Promise<AxiosResponse<User[]>> {
+      return apiClient.get('/users');
+    },
+
+    // Get a specific user by ID
+    getUser(id: number | string): Promise<AxiosResponse<User>> {
+      return apiClient.get(`/users/${id}`);
+    }
+  };
+  ```
+
+- **Error Handling Interceptors**: Added interceptors for centralized error handling:
+  ```typescript
+  // Add response interceptor for error handling
+  apiClient.interceptors.response.use(
+    (response: AxiosResponse) => {
+      return response;
+    },
+    (error: AxiosError) => {
+      // Handle common errors
+      if (error.response) {
+        console.error('API Error:', error.response.status, error.response.data);
+      } else if (error.request) {
+        console.error('Network Error:', error.request);
+      } else {
+        console.error('Error:', error.message);
+      }
+      return Promise.reject(error);
+    }
+  );
+  ```
+
+### 7. Mobile Navigation Drawer Implementation Challenges
+
+**Problem**: Creating an accessible, performant mobile navigation drawer with proper interaction patterns.
+
+**Solution**:
+
+- **Fixed Position Drawer**: Implemented a fixed-position drawer that slides in from the right:
+  ```css
+  .nav {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 70%;
+    max-width: 300px;
+    height: 100vh;
+    background-color: var(--bg-light);
+    box-shadow: var(--shadow-lg);
+    transition: right 0.3s ease;
+    z-index: 100;
+  }
+
+  .nav.nav-open {
+    right: 0;
+  }
+  ```
+
+- **Background Scroll Lock**: Prevented background scrolling when the drawer is open:
+  ```typescript
+  // Watch for changes to menuOpen to toggle body scroll
+  watch(menuOpen, (isOpen) => {
+    if (isOpen) {
+      // Disable scrolling on the body when drawer is open
+      document.body.classList.add('drawer-open');
+    } else {
+      // Re-enable scrolling when drawer is closed
+      document.body.classList.remove('drawer-open');
+    }
+  });
+  ```
+
+- **Click Outside Detection**: Implemented click detection outside the drawer to close it:
+  ```typescript
+  // Function to handle clicks outside the drawer
+  const handleClickOutside = (event: MouseEvent) => {
+    const nav = document.querySelector('.nav');
+    const menuToggle = document.querySelector('.menu-toggle');
+
+    // If the drawer is open and the click is outside the nav and not on the menu toggle
+    if (menuOpen.value && nav && !nav.contains(event.target as Node) &&
+        menuToggle && !menuToggle.contains(event.target as Node)) {
+      menuOpen.value = false;
+    }
+  };
+
+  // Add and remove event listeners
+  onMounted(() => {
+    document.addEventListener('click', handleClickOutside);
+  });
+
+  onUnmounted(() => {
+    document.removeEventListener('click', handleClickOutside);
+  });
+  ```
+
+- **Accessible Toggle Button**: Created an accessible hamburger menu toggle:
+  ```html
+  <button class="menu-toggle" @click="toggleMenu" aria-label="Toggle menu">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+  ```
+
+- **Smooth Transitions**: Added smooth transitions for opening and closing the drawer:
+  ```css
+  .nav {
+    transition: right 0.3s ease;
+  }
+
+  .drawer-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    z-index: 90;
+  }
+
+  .drawer-overlay.active {
+    opacity: 1;
+    visibility: visible;
+  }
+  ```
 
 ## Getting Started
 
