@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted, onUnmounted, watch } from 'vue';
 
 // Mobile menu state
 const menuOpen = ref(false);
@@ -8,6 +8,38 @@ const menuOpen = ref(false);
 const toggleMenu = () => {
   menuOpen.value = !menuOpen.value;
 };
+
+// Function to handle clicks outside the drawer
+const handleClickOutside = (event: MouseEvent) => {
+  const nav = document.querySelector('.nav');
+  const menuToggle = document.querySelector('.menu-toggle');
+
+  // If the drawer is open and the click is outside the nav and not on the menu toggle
+  if (menuOpen.value && nav && !nav.contains(event.target as Node) &&
+      menuToggle && !menuToggle.contains(event.target as Node)) {
+    menuOpen.value = false;
+  }
+};
+
+// Watch for changes to menuOpen to toggle body scroll
+watch(menuOpen, (isOpen) => {
+  if (isOpen) {
+    // Disable scrolling on the body when drawer is open
+    document.body.classList.add('drawer-open');
+  } else {
+    // Re-enable scrolling when drawer is closed
+    document.body.classList.remove('drawer-open');
+  }
+});
+
+// Add and remove event listeners
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside);
+});
 </script>
 
 <template>
@@ -24,6 +56,8 @@ const toggleMenu = () => {
             <span></span>
             <span></span>
           </button>
+          <!-- Overlay that appears when drawer is open -->
+          <div class="drawer-overlay" :class="{ 'active': menuOpen }"></div>
           <nav class="nav" :class="{ 'nav-open': menuOpen }">
             <router-link :to="{ name: 'dashboard' }">Dashboard</router-link>
           </nav>
@@ -110,6 +144,14 @@ body {
   color: var(--text-color);
   background-color: var(--bg-color);
   line-height: 1.5;
+}
+
+/* Prevent scrolling when drawer is open */
+body.drawer-open {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+  height: 100%;
 }
 
 .container {
@@ -237,6 +279,25 @@ button {
   color: var(--text-light);
   font-size: 0.875rem;
   text-align: center;
+}
+
+/* Drawer overlay */
+.drawer-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 99;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.drawer-overlay.active {
+  opacity: 1;
+  visibility: visible;
 }
 
 /* Responsive styles */
