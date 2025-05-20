@@ -4,32 +4,44 @@
     <div class="filter-form">
       <div class="form-group">
         <label for="name-filter">Name</label>
-        <input
-          id="name-filter"
-          type="text"
-          v-model="name"
-          placeholder="Filter by name"
-        />
+        <div class="input-wrapper">
+          <input
+            id="name-filter"
+            type="text"
+            :value="currentFilters.name"
+            @input="e => handleFilterInput(e, 'name')"
+            placeholder="Filter by name"
+          />
+          <span v-if="debouncingFields.name" class="debounce-indicator"></span>
+        </div>
       </div>
 
       <div class="form-group">
         <label for="email-filter">Email</label>
-        <input
-          id="email-filter"
-          type="text"
-          v-model="email"
-          placeholder="Filter by email"
-        />
+        <div class="input-wrapper">
+          <input
+            id="email-filter"
+            type="text"
+            :value="currentFilters.email"
+            @input="e => handleFilterInput(e, 'email')"
+            placeholder="Filter by email"
+          />
+          <span v-if="debouncingFields.email" class="debounce-indicator"></span>
+        </div>
       </div>
 
       <div class="form-group">
         <label for="company-filter">Company</label>
-        <input
-          id="company-filter"
-          type="text"
-          v-model="company"
-          placeholder="Filter by company"
-        />
+        <div class="input-wrapper">
+          <input
+            id="company-filter"
+            type="text"
+            :value="currentFilters.company"
+            @input="e => handleFilterInput(e, 'company')"
+            placeholder="Filter by company"
+          />
+          <span v-if="debouncingFields.company" class="debounce-indicator"></span>
+        </div>
       </div>
 
       <button class="clear-btn" @click="clearFilters">Clear Filters</button>
@@ -39,32 +51,45 @@
 
 <script setup lang="ts">
 import { useUsers } from '@/hooks/useUsers';
-import { computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { UserFilters } from '@/types';
+import { debounce } from '@/utils/debounce';
 
 // Get the shared filters and actions from the hook
-const { filters, setFilter, clearFilters } = useUsers();
+const { filters, setFilter, clearFilters: clearFiltersHook } = useUsers();
 
-// Create computed properties for two-way binding
-const name = computed({
-  get: () => filters.value.name,
-  set: (value: string) => setFilter('name', value)
+// Create a computed property for the current filters that unwraps the computed ref
+const currentFilters = computed(() => {
+  return filters.value;
 });
 
-const email = computed({
-  get: () => filters.value.email,
-  set: (value: string) => setFilter('email', value)
+// Wrapper for clearFilters to also reset debouncing state
+const clearFilters = () => {
+  clearFiltersHook();
+  // Reset all debouncing indicators
+  Object.keys(debouncingFields.value).forEach(key => {
+    debouncingFields.value[key as keyof UserFilters] = false;
+  });
+};
+
+// Track which fields are currently being debounced
+const debouncingFields = ref<Record<keyof UserFilters, boolean>>({
+  name: false,
+  email: false,
+  company: false
 });
 
-const company = computed({
-  get: () => filters.value.company,
-  set: (value: string) => setFilter('company', value)
-});
+// Create debounced filter handlers with 300ms delay
+const debouncedSetFilter = debounce((field: keyof UserFilters, value: string) => {
+  setFilter(field, value);
+  debouncingFields.value[field] = false;
+}, 300);
 
-// Update all filters at once (for input events)
-const updateFilters = (): void => {
-  // This is now a no-op since we're using computed properties
-  // that automatically update the shared state
+// Handle input events with debouncing
+const handleFilterInput = (event: Event, field: keyof UserFilters): void => {
+  const target = event.target as HTMLInputElement;
+  debouncingFields.value[field] = true;
+  debouncedSetFilter(field, target.value);
 };
 </script>
 
@@ -124,6 +149,11 @@ label {
   font-weight: 500;
 }
 
+.input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
 input {
   padding: var(--space-sm) var(--space-md);
   border: 1px solid var(--border-color);
@@ -144,6 +174,34 @@ input:focus {
   outline: none;
   border-color: var(--primary-color);
   box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+}
+
+.debounce-indicator {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--primary-color);
+  opacity: 0.7;
+  animation: pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse {
+  0% {
+    transform: translateY(-50%) scale(0.8);
+    opacity: 0.7;
+  }
+  50% {
+    transform: translateY(-50%) scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-50%) scale(0.8);
+    opacity: 0.7;
+  }
 }
 
 .clear-btn {
