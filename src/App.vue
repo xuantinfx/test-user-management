@@ -145,6 +145,7 @@ button {
   position: sticky;
   top: 0;
   z-index: 100;
+  width: 100%;
 }
 
 .header-content {
@@ -229,6 +230,7 @@ button {
   border-top: 1px solid var(--border-color);
   padding: var(--space-lg) 0;
   margin-top: var(--space-xl);
+  width: 100%;
 }
 
 .app-footer p {
