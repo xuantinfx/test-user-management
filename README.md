@@ -31,6 +31,13 @@ TODO: show all screenshots of the app, include: user management, error handling 
 - **Error Handling**: Graceful error handling with user-friendly messages and recovery options
 - **Loading States**: Visual feedback during data loading operations
 - **Clean UI/UX**: Intuitive interface with consistent styling and smooth transitions
+- **Theme Switching**: Dynamic light and dark theme support with the following features:
+  - System preference detection using `prefers-color-scheme` media query
+  - Real-time theme updates when system preferences change
+  - User preference persistence in localStorage
+  - Accessible theme toggle with proper ARIA attributes
+  - Smooth transitions between themes
+  - Comprehensive CSS variable-based theming system
 
 ## Technology Stack
 
@@ -210,6 +217,129 @@ Key aspects:
 - Responsive typography with relative units
 - Breakpoints for different device sizes
 - Touch-friendly UI elements for mobile
+
+### Theme Switching Implementation
+
+The application features a comprehensive theme switching system with light and dark modes:
+
+```typescript
+// Theme composable in useTheme.ts
+export function useTheme() {
+  // Create a reactive reference to store the current theme
+  const theme = ref<ThemeType>('light');
+
+  // Check if system prefers dark mode
+  const systemPrefersDark = computed(() => {
+    if (typeof window === 'undefined') return false;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
+
+  // Initialize theme from localStorage or system preference
+  const initializeTheme = (): void => {
+    const storedTheme = localStorage.getItem('theme') as ThemeType | null;
+
+    if (storedTheme) {
+      // Use stored theme if available
+      theme.value = storedTheme;
+    } else {
+      // Otherwise use system preference
+      theme.value = systemPrefersDark.value ? 'dark' : 'light';
+    }
+
+    // Apply theme to document
+    applyTheme(theme.value);
+  };
+
+  // Listen for system preference changes
+  onMounted(() => {
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+      if (!localStorage.getItem('theme')) {
+        // Only update if user hasn't manually set a preference
+        theme.value = e.matches ? 'dark' : 'light';
+      }
+    });
+  });
+}
+```
+
+Key aspects:
+
+- **System Preference Detection**: Automatically detects and applies the user's system theme preference using the `prefers-color-scheme` media query
+- **Real-time Preference Monitoring**: Listens for changes to the system's theme preference and updates the application theme in real-time when the user hasn't explicitly set a preference
+- **User Preference Persistence**: Stores the user's explicit theme choice in localStorage, which takes precedence over system preferences
+- **CSS Variables for Theming**: Uses CSS custom properties to define theme-specific colors and styles
+- **Smooth Theme Transitions**: Implements smooth transitions between themes for a polished user experience
+- **Accessible Toggle**: Provides an accessible theme toggle with proper ARIA attributes and keyboard support
+- **Semantic HTML**: Uses the `data-theme` attribute on the root element to apply theme styles
+
+The CSS implementation uses CSS variables for theme-specific styling:
+
+```css
+/* Light theme (default) */
+:root[data-theme="light"] {
+  /* Primary Colors */
+  --primary-color: #4f46e5;
+  --primary-dark: #4338ca;
+  --primary-light: #818cf8;
+
+  /* Background Colors */
+  --bg-color: #f9fafb;
+  --bg-light: #ffffff;
+  --bg-dark: #f3f4f6;
+
+  /* Text Colors */
+  --text-color: #1f2937;
+  --text-light: #6b7280;
+}
+
+/* Dark theme */
+:root[data-theme="dark"] {
+  /* Primary Colors */
+  --primary-color: #818cf8;
+  --primary-dark: #6366f1;
+  --primary-light: #a5b4fc;
+
+  /* Background Colors */
+  --bg-color: #111827;
+  --bg-light: #1f2937;
+  --bg-dark: #0f172a;
+
+  /* Text Colors */
+  --text-color: #f9fafb;
+  --text-light: #e5e7eb;
+}
+
+/* Theme transition for smooth switching */
+* {
+  transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
+}
+```
+
+The theme toggle component is designed with accessibility in mind:
+
+```vue
+<template>
+  <button
+    class="theme-toggle"
+    @click="toggleTheme"
+    :aria-label="isDark ? 'Switch to light theme' : 'Switch to dark theme'"
+    :title="isDark ? 'Switch to light theme' : 'Switch to dark theme'"
+    aria-live="polite"
+    role="switch"
+    :aria-checked="isDark"
+  >
+    <!-- Sun/Moon icons -->
+    <svg v-if="!isDark" class="icon sun-icon" viewBox="0 0 24 24">
+      <!-- Sun icon paths -->
+    </svg>
+    <svg v-else class="icon moon-icon" viewBox="0 0 24 24">
+      <!-- Moon icon paths -->
+    </svg>
+
+    <span class="sr-only">{{ isDark ? 'Dark mode active' : 'Light mode active' }}</span>
+  </button>
+</template>
+```
 
 ## Performance Optimizations
 
@@ -396,14 +526,14 @@ npm run test:e2e
 - **Unit and Integration Tests**: Add comprehensive test coverage
 - **Server-side Pagination**: Implement server-side pagination for very large datasets
 - **Filtering Enhancements**: Add advanced filtering options (range filters, multi-select)
-- **Dark Mode**: Implement theme switching functionality
 
 ### Medium-term Roadmap
 
 - **Offline Support**: Add service workers for offline functionality
 - **Data Caching**: Implement client-side caching for improved performance
 - **Internationalization**: Add multi-language support
-- **Accessibility Improvements**: Enhance keyboard navigation and screen reader support
+- **Additional Accessibility Improvements**: Further enhance keyboard navigation and screen reader support
+- **Theme Customization**: Allow users to customize theme colors beyond light/dark modes
 
 ### Long-term Vision
 
@@ -421,15 +551,21 @@ user-dashboard/
 │   ├── assets/          # Images, fonts, etc.
 │   ├── components/
 │   │   ├── ui/          # Reusable UI components
+│   │   │   ├── ErrorAlert.vue      # Error message component
+│   │   │   ├── LoadingSpinner.vue  # Loading indicator component
+│   │   │   └── ThemeToggle.vue     # Theme switching component
 │   │   └── users/       # User-specific components
-│   ├── hooks/           # Vue Query hooks
+│   ├── hooks/           # Vue composables and hooks
+│   │   ├── useTheme.ts  # Theme management composable
+│   │   ├── useUser.ts   # Single user data hook
+│   │   └── useUsers.ts  # Users list data hook
 │   ├── plugins/         # Vue plugins configuration
 │   ├── router/          # Vue Router configuration
 │   ├── services/        # API services
 │   ├── types/           # TypeScript type definitions
 │   ├── views/           # Page components
-│   ├── App.vue          # Root component
-│   ├── main.ts          # Application entry point
+│   ├── App.vue          # Root component with theme CSS variables
+│   ├── main.ts          # Application entry point with theme initialization
 │   └── shims-vue.d.ts   # Vue TypeScript declarations
 ├── .env                 # Environment variables
 ├── .gitignore

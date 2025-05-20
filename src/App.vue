@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from 'vue';
+import ThemeToggle from './components/ui/ThemeToggle.vue';
 
 // Mobile menu state
 const menuOpen = ref(false);
@@ -60,6 +61,9 @@ onUnmounted(() => {
           <div class="drawer-overlay" :class="{ 'active': menuOpen }"></div>
           <nav class="nav" :class="{ 'nav-open': menuOpen }">
             <router-link :to="{ name: 'dashboard' }">Dashboard</router-link>
+            <div class="theme-toggle-wrapper">
+              <ThemeToggle />
+            </div>
           </nav>
         </div>
       </div>
@@ -80,6 +84,26 @@ onUnmounted(() => {
 <style>
 /* Global styles */
 :root {
+  /* Common variables for both themes */
+  /* Spacing */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+
+  /* Breakpoints */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+
+  /* Theme transition */
+  --theme-transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Light theme (default) */
+:root[data-theme="light"] {
   /* Primary Colors */
   --primary-color: #4f46e5;
   --primary-dark: #4338ca;
@@ -118,19 +142,48 @@ onUnmounted(() => {
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
 
-  /* Spacing */
-  --space-xs: 0.25rem;
-  --space-sm: 0.5rem;
-  --space-md: 1rem;
-  --space-lg: 1.5rem;
-  --space-xl: 2rem;
+/* Dark theme */
+:root[data-theme="dark"] {
+  /* Primary Colors */
+  --primary-color: #818cf8;
+  --primary-dark: #6366f1;
+  --primary-light: #a5b4fc;
 
-  /* Breakpoints */
-  --breakpoint-sm: 640px;
-  --breakpoint-md: 768px;
-  --breakpoint-lg: 1024px;
-  --breakpoint-xl: 1280px;
+  /* Secondary Colors */
+  --secondary-color: #34d399;
+  --secondary-dark: #10b981;
+  --secondary-light: #6ee7b7;
+
+  /* Neutral Colors */
+  --text-color: #f9fafb;
+  --text-light: #e5e7eb;
+  --text-lighter: #d1d5db;
+
+  /* Background Colors */
+  --bg-color: #111827;
+  --bg-light: #1f2937;
+  --bg-dark: #0f172a;
+
+  /* Border Colors */
+  --border-color: #374151;
+  --border-dark: #4b5563;
+
+  /* Status Colors */
+  --danger-color: #f87171;
+  --danger-dark: #ef4444;
+  --warning-color: #fbbf24;
+  --warning-dark: #f59e0b;
+  --success-color: #34d399;
+  --success-dark: #10b981;
+  --info-color: #60a5fa;
+  --info-dark: #3b82f6;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
 }
 
 * {
@@ -144,6 +197,7 @@ body {
   color: var(--text-color);
   background-color: var(--bg-color);
   line-height: 1.5;
+  transition: var(--theme-transition);
 }
 
 /* Prevent scrolling when drawer is open */
@@ -163,6 +217,7 @@ body.drawer-open {
 a {
   color: var(--primary-color);
   text-decoration: none;
+  transition: var(--theme-transition);
 }
 
 a:hover {
@@ -171,6 +226,7 @@ a:hover {
 
 button {
   cursor: pointer;
+  transition: var(--theme-transition);
 }
 
 /* App specific styles */
@@ -188,6 +244,7 @@ button {
   top: 0;
   z-index: 100;
   width: 100%;
+  transition: var(--theme-transition);
 }
 
 .header-content {
@@ -240,6 +297,13 @@ button {
 .nav {
   display: flex;
   gap: var(--space-sm);
+  align-items: center;
+}
+
+.theme-toggle-wrapper {
+  margin-left: var(--space-md);
+  display: flex;
+  align-items: center;
 }
 
 .nav a {
@@ -273,6 +337,7 @@ button {
   padding: var(--space-lg) 0;
   margin-top: var(--space-xl);
   width: 100%;
+  transition: var(--theme-transition);
 }
 
 .app-footer p {
@@ -330,6 +395,13 @@ button {
     width: 100%;
     text-align: left;
     border-bottom: 1px solid var(--border-color);
+  }
+
+  .theme-toggle-wrapper {
+    margin-left: 0;
+    margin-top: var(--space-lg);
+    width: 100%;
+    justify-content: center;
   }
 }
 
