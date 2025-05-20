@@ -110,6 +110,11 @@ button {
   color: var(--text-color);
 }
 
+.nav {
+  display: flex;
+  gap: 0.5rem;
+}
+
 .nav a {
   color: var(--text-color);
   font-weight: 500;

@@ -26,6 +26,7 @@ TODO: show all screenshots of the app, include: user management, error handling 
 - **Data Fetching**: Efficient data retrieval from JSONPlaceholder API with proper error handling
 - **Interactive Filtering**: Real-time filtering of users by name, email, and company
 - **Dynamic Sorting**: Sort users by any column (ID, name, username, email, company) with direction toggle
+- **Pagination**: Efficient handling of large datasets with customizable page size and intuitive navigation
 - **User Details View**: Comprehensive user profile with contact information, address with map integration, and company details
 - **Error Handling**: Graceful error handling with user-friendly messages and recovery options
 - **Loading States**: Visual feedback during data loading operations
@@ -144,6 +145,30 @@ Key aspects:
 - Direction toggle (ascending/descending)
 - Visual indicators for sort field and direction
 
+### Pagination Implementation
+
+The pagination system efficiently handles large datasets by dividing them into manageable pages:
+
+```javascript
+// Pagination implementation in useUsers.js hook
+const paginatedUsers = computed(() => {
+  if (!sortedUsers.value || sortedUsers.value.length === 0) return [];
+
+  const startIndex = (pagination.value.currentPage - 1) * pagination.value.pageSize;
+  const endIndex = startIndex + pagination.value.pageSize;
+
+  return sortedUsers.value.slice(startIndex, endIndex);
+});
+```
+
+Key aspects:
+
+- Client-side pagination for efficient rendering
+- Customizable page size (5, 10, 20, 50, 100 items per page)
+- Intuitive navigation controls with page numbers
+- Automatic recalculation when filters or sorting change
+- Maintains state when switching between views
+
 ### Responsive Design Implementation
 
 The application uses a mobile-first approach with CSS Grid and Flexbox:
@@ -248,7 +273,19 @@ Key aspects:
 - Created alternative card views for very small screens
 - Applied strategic column hiding based on screen size
 
-### Challenge 4: Error Handling and Recovery
+### Challenge 4: Handling Large Datasets
+
+**Problem**: Rendering large amounts of user data efficiently without compromising performance or user experience.
+
+**Solution**:
+
+- Implemented client-side pagination to limit the number of DOM elements rendered at once
+- Created a flexible pagination system with customizable page sizes
+- Designed intuitive navigation controls with page numbers and prev/next buttons
+- Optimized computed properties to only process visible data
+- Added responsive design considerations for pagination controls on mobile devices
+
+### Challenge 5: Error Handling and Recovery
 
 **Problem**: Creating a robust error handling system that's both informative and allows for recovery.
 
@@ -269,10 +306,10 @@ Key aspects:
 
 ```bash
 # Clone the repository
-git clone <repository-url>
+git clone https://github.com/xuantinfx/test-user-management.git
 
 # Navigate to the project directory
-cd user-dashboard
+cd test-user-management
 
 # Install dependencies
 npm install
@@ -327,7 +364,7 @@ npm run test:e2e
 ### Short-term Improvements
 
 - **Unit and Integration Tests**: Add comprehensive test coverage
-- **Pagination**: Implement pagination for large datasets
+- **Server-side Pagination**: Implement server-side pagination for very large datasets
 - **Filtering Enhancements**: Add advanced filtering options (range filters, multi-select)
 - **Dark Mode**: Implement theme switching functionality
 
@@ -368,17 +405,3 @@ user-dashboard/
 ├── README.md
 └── vite.config.js
 ```
-
----
-
-## Conclusion
-
-This User Dashboard application demonstrates a production-ready Vue.js implementation with a focus on code quality, performance, and user experience. The architecture follows best practices for maintainability and scalability, making it suitable for real-world applications.
-
-The combination of Vue 3, Vite, TanStack Query, and Vue Router provides a modern, efficient foundation for building complex web applications. The implementation showcases how to handle common challenges in web development, from responsive design to data fetching, state management, and API integration.
-
----
-
-## Credits
-
-Built with ❤️ using Vue 3 and Vite

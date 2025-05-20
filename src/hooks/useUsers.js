@@ -12,7 +12,7 @@ export const userKeys = {
 };
 
 /**
- * Hook for fetching and filtering users
+ * Hook for fetching and filtering users with pagination support
  */
 export function useUsers() {
   // Filter state
@@ -24,8 +24,16 @@ export function useUsers() {
 
   // Sorting state
   const sortBy = ref({
-    field: 'name',
+    field: 'id',
     direction: 'asc'
+  });
+
+  // Pagination state
+  const pagination = ref({
+    currentPage: 1,
+    pageSize: 5,
+    totalItems: 0,
+    totalPages: 0
   });
 
   // Query client for refetching
@@ -44,19 +52,31 @@ export function useUsers() {
       const response = await userService.getUsers();
       return response.data;
     },
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   // Filter users based on current filters
   const filteredUsers = computed(() => {
     if (!users.value || users.value.length === 0) return [];
 
-    return users.value.filter(user => {
+    const filtered = users.value.filter(user => {
       const nameMatch = user.name.toLowerCase().includes(filters.value.name.toLowerCase());
       const emailMatch = user.email.toLowerCase().includes(filters.value.email.toLowerCase());
       const companyMatch = user.company.name.toLowerCase().includes(filters.value.company.toLowerCase());
-      
+
       return nameMatch && emailMatch && companyMatch;
     });
+
+    // Update pagination totals
+    pagination.value.totalItems = filtered.length;
+    pagination.value.totalPages = Math.ceil(filtered.length / pagination.value.pageSize);
+
+    // Reset to first page if current page is out of bounds
+    if (pagination.value.currentPage > pagination.value.totalPages && pagination.value.totalPages > 0) {
+      pagination.value.currentPage = 1;
+    }
+
+    return filtered;
   });
 
   // Sort users based on current sort criteria
@@ -65,7 +85,7 @@ export function useUsers() {
 
     return [...filteredUsers.value].sort((a, b) => {
       let fieldA, fieldB;
-      
+
       // Handle nested fields like company.name
       if (sortBy.value.field === 'company') {
         fieldA = a.company.name;
@@ -74,19 +94,29 @@ export function useUsers() {
         fieldA = a[sortBy.value.field];
         fieldB = b[sortBy.value.field];
       }
-      
+
       // Case insensitive string comparison
       if (typeof fieldA === 'string') {
         fieldA = fieldA.toLowerCase();
         fieldB = fieldB.toLowerCase();
       }
-      
+
       if (sortBy.value.direction === 'asc') {
         return fieldA > fieldB ? 1 : -1;
       } else {
         return fieldA < fieldB ? 1 : -1;
       }
     });
+  });
+
+  // Get paginated users
+  const paginatedUsers = computed(() => {
+    if (!sortedUsers.value || sortedUsers.value.length === 0) return [];
+
+    const startIndex = (pagination.value.currentPage - 1) * pagination.value.pageSize;
+    const endIndex = startIndex + pagination.value.pageSize;
+
+    return sortedUsers.value.slice(startIndex, endIndex);
   });
 
   // Check if any filters are applied
@@ -97,6 +127,8 @@ export function useUsers() {
   // Set filter value
   const setFilter = (filterName, value) => {
     filters.value[filterName] = value;
+    // Reset to first page when filtering
+    pagination.value.currentPage = 1;
   };
 
   // Clear all filters
@@ -106,6 +138,8 @@ export function useUsers() {
       email: '',
       company: ''
     };
+    // Reset to first page when clearing filters
+    pagination.value.currentPage = 1;
   };
 
   // Set sort criteria
@@ -120,6 +154,33 @@ export function useUsers() {
     }
   };
 
+  // Pagination methods
+  const goToPage = (page) => {
+    if (page >= 1 && page <= pagination.value.totalPages) {
+      pagination.value.currentPage = page;
+    }
+  };
+
+  const nextPage = () => {
+    if (pagination.value.currentPage < pagination.value.totalPages) {
+      pagination.value.currentPage++;
+    }
+  };
+
+  const prevPage = () => {
+    if (pagination.value.currentPage > 1) {
+      pagination.value.currentPage--;
+    }
+  };
+
+  const setPageSize = (size) => {
+    pagination.value.pageSize = size;
+    pagination.value.totalPages = Math.ceil(pagination.value.totalItems / size);
+
+    // Reset to first page when changing page size
+    pagination.value.currentPage = 1;
+  };
+
   // Refresh users data
   const refreshUsers = async () => {
     await refetch();
@@ -130,19 +191,25 @@ export function useUsers() {
     users,
     filteredUsers,
     sortedUsers,
-    
+    paginatedUsers,
+
     // State
     filters,
     sortBy,
+    pagination,
     isLoading,
     isError,
     error,
     isFiltered,
-    
+
     // Actions
     setFilter,
     clearFilters,
     setSortBy,
+    goToPage,
+    nextPage,
+    prevPage,
+    setPageSize,
     refreshUsers
   };
 }

@@ -37,7 +37,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="user in sortedUsers" :key="user.id">
+        <tr v-for="user in paginatedUsers" :key="user.id">
           <td>{{ user.id }}</td>
           <td>{{ user.name }}</td>
           <td>{{ user.username }}</td>
@@ -51,7 +51,7 @@
             </router-link>
           </td>
         </tr>
-        <tr v-if="sortedUsers.length === 0">
+        <tr v-if="paginatedUsers.length === 0">
           <td colspan="6" class="no-results">
             <p v-if="isLoading">Loading users...</p>
             <p v-else-if="error">Error loading users</p>
@@ -61,28 +61,151 @@
         </tr>
       </tbody>
     </table>
+
+    <!-- Pagination Controls -->
+    <div class="pagination-controls" >
+      <div class="pagination-info">
+        Showing {{ pagination.currentPage }} of {{ pagination.totalPages }} pages
+        ({{ pagination.totalItems }} total items)
+      </div>
+
+      <div class="pagination-actions">
+        <button
+          @click="prevPage"
+          class="pagination-btn"
+          :disabled="pagination.currentPage === 1"
+          aria-label="Previous page"
+        >
+          &laquo; Prev
+        </button>
+
+        <div class="pagination-pages">
+          <button
+            v-for="page in displayedPages"
+            :key="page"
+            @click="goToPage(page)"
+            class="pagination-btn"
+            :class="{ active: pagination.currentPage === page }"
+          >
+            {{ page }}
+          </button>
+        </div>
+
+        <button
+          @click="nextPage"
+          class="pagination-btn"
+          :disabled="pagination.currentPage === pagination.totalPages"
+          aria-label="Next page"
+        >
+          Next &raquo;
+        </button>
+      </div>
+
+      <div class="page-size-selector">
+        <label for="page-size">Items per page:</label>
+        <select
+          id="page-size"
+          v-model="pageSize"
+          @change="updatePageSize"
+          class="page-size-select"
+        >
+          <option value="5">5</option>
+          <option value="10">10</option>
+          <option value="20">20</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+        </select>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
+import { ref, computed } from 'vue';
 import { useUsers } from '../../hooks/useUsers';
 
 export default {
   name: 'UserTable',
   setup() {
-    const { sortBy, setSortBy, sortedUsers, users, isLoading, error } = useUsers();
+    const {
+      sortBy,
+      setSortBy,
+      paginatedUsers,
+      users,
+      isLoading,
+      error,
+      pagination,
+      goToPage,
+      nextPage,
+      prevPage,
+      setPageSize
+    } = useUsers();
 
+    // Page size state
+    const pageSize = ref(pagination.value.pageSize);
+
+    // Calculate which page numbers to display
+    const displayedPages = computed(() => {
+      const totalPages = pagination.value.totalPages;
+      const currentPage = pagination.value.currentPage;
+
+      if (totalPages <= 7) {
+        // If 7 or fewer pages, show all
+        return Array.from({ length: totalPages }, (_, i) => i + 1);
+      }
+
+      // Always include first and last page
+      const pages = [1, totalPages];
+
+      // Add current page and pages around it
+      const pagesToAdd = [
+        currentPage - 2,
+        currentPage - 1,
+        currentPage,
+        currentPage + 1,
+        currentPage + 2
+      ].filter(p => p > 1 && p < totalPages);
+
+      // Add ellipses where needed
+      if (pagesToAdd[0] > 2) {
+        pages.splice(1, 0, '...');
+      }
+
+      // Add the pages around current page
+      pages.splice(pages.indexOf(1) + 1, 0, ...pagesToAdd);
+
+      // Add ellipsis before last page if needed
+      if (pagesToAdd[pagesToAdd.length - 1] < totalPages - 1) {
+        pages.splice(pages.indexOf(totalPages), 0, '...');
+      }
+
+      return pages;
+    });
+
+    // Sort users by field
     const sortUsers = (field) => {
       setSortBy(field);
+    };
+
+    // Update page size
+    const updatePageSize = () => {
+      setPageSize(Number(pageSize.value));
     };
 
     return {
       sortBy,
       sortUsers,
-      sortedUsers,
+      paginatedUsers,
       users,
       isLoading,
-      error
+      error,
+      pagination,
+      displayedPages,
+      pageSize,
+      goToPage,
+      nextPage,
+      prevPage,
+      updatePageSize
     };
   }
 }
@@ -93,6 +216,8 @@ export default {
   overflow-x: auto;
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
 }
 
 .user-table {
@@ -100,6 +225,7 @@ export default {
   border-collapse: collapse;
   font-size: 0.875rem;
   text-align: left;
+  table-layout: fixed;
 }
 
 .user-table th {
@@ -132,6 +258,9 @@ export default {
   padding: 0.75rem 1rem;
   border-bottom: 1px solid #e5e7eb;
   color: #4b5563;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .user-table tbody tr:hover {
@@ -168,6 +297,81 @@ export default {
   color: #6b7280;
 }
 
+/* Pagination Controls */
+.pagination-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background-color: #f9fafb;
+  border-top: 1px solid #e5e7eb;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.pagination-info {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.pagination-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pagination-pages {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.pagination-btn {
+  background-color: #ffffff;
+  border: 1px solid #d1d5db;
+  color: #4b5563;
+  padding: 0.375rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background-color: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.pagination-btn.active {
+  background-color: #3b82f6;
+  border-color: #3b82f6;
+  color: white;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.page-size-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.page-size-selector label {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.page-size-select {
+  padding: 0.375rem 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  background-color: white;
+}
+
+/* Responsive styles */
 @media (max-width: 768px) {
   .user-table th, .user-table td {
     padding: 0.5rem;
@@ -175,6 +379,25 @@ export default {
 
   .user-table {
     font-size: 0.75rem;
+  }
+
+  /* Hide less important columns on mobile */
+  .user-table th:nth-child(3),
+  .user-table td:nth-child(3),
+  .user-table th:nth-child(5),
+  .user-table td:nth-child(5) {
+    display: none;
+  }
+
+  .pagination-controls {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .pagination-actions {
+    width: 100%;
+    justify-content: center;
+    order: -1;
   }
 }
 </style>
