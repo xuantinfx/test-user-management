@@ -263,13 +263,11 @@ const updatePageSize = (): void => {
 }
 
 .user-table a {
-  color: var(--primary-color);
   text-decoration: none;
   transition: color 0.2s ease;
 }
 
 .user-table a:hover {
-  color: var(--primary-dark);
   text-decoration: underline;
 }
 

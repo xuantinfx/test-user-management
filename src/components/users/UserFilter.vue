@@ -114,6 +114,7 @@ h2::after {
 .form-group {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
 }
 
 label {
@@ -132,6 +133,7 @@ input {
   background-color: var(--bg-light);
   height: 34px;
   color: var(--text-color);
+  width: 100%;
 }
 
 input:hover {

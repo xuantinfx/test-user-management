@@ -219,13 +219,11 @@ const mapUrl = computed<string>(() => {
 }
 
 .detail-item a {
-  color: var(--primary-color);
   text-decoration: none;
   transition: color 0.2s ease;
 }
 
 .detail-item a:hover {
-  color: var(--primary-dark);
   text-decoration: underline;
 }
 
@@ -240,7 +238,7 @@ const mapUrl = computed<string>(() => {
 
 .map-btn {
   display: inline-block;
-  background-color: var(--secondary-color);
+  background-color: var(--primary-color);
   color: white;
   padding: var(--space-sm) var(--space-md);
   border-radius: 4px;
@@ -251,7 +249,6 @@ const mapUrl = computed<string>(() => {
 }
 
 .map-btn:hover {
-  background-color: var(--secondary-dark);
   transform: translateY(-1px);
 }
 
