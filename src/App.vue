@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 // App is the root component
 </script>
 

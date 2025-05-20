@@ -1,14 +1,15 @@
-import { ref, computed, watch } from 'vue';
+import { ref, computed, ComputedRef } from 'vue';
 import { useQuery, useQueryClient } from '@tanstack/vue-query';
 import { userService } from '../services/api';
+import { User, UserFilters, SortCriteria, Pagination } from '@/types';
 
 // Query keys
 export const userKeys = {
-  all: ['users'],
-  lists: () => [...userKeys.all, 'list'],
-  list: (filters) => [...userKeys.lists(), { filters }],
-  details: () => [...userKeys.all, 'detail'],
-  detail: (id) => [...userKeys.details(), id],
+  all: ['users'] as const,
+  lists: () => [...userKeys.all, 'list'] as const,
+  list: (filters: UserFilters) => [...userKeys.lists(), { filters }] as const,
+  details: () => [...userKeys.all, 'detail'] as const,
+  detail: (id: number | string) => [...userKeys.details(), id] as const,
 };
 
 /**
@@ -16,20 +17,20 @@ export const userKeys = {
  */
 export function useUsers() {
   // Filter state
-  const filters = ref({
+  const filters = ref<UserFilters>({
     name: '',
     email: '',
     company: ''
   });
 
   // Sorting state
-  const sortBy = ref({
+  const sortBy = ref<SortCriteria>({
     field: 'id',
     direction: 'asc'
   });
 
   // Pagination state
-  const pagination = ref({
+  const pagination = ref<Pagination>({
     currentPage: 1,
     pageSize: 5,
     totalItems: 0,
@@ -37,7 +38,7 @@ export function useUsers() {
   });
 
   // Query client for refetching
-  const queryClient = useQueryClient();
+  useQueryClient();
 
   // Fetch users query
   const {
@@ -56,7 +57,7 @@ export function useUsers() {
   });
 
   // Filter users based on current filters
-  const filteredUsers = computed(() => {
+  const filteredUsers: ComputedRef<User[]> = computed(() => {
     if (!users.value || users.value.length === 0) return [];
 
     const filtered = users.value.filter(user => {
@@ -80,19 +81,19 @@ export function useUsers() {
   });
 
   // Sort users based on current sort criteria
-  const sortedUsers = computed(() => {
+  const sortedUsers: ComputedRef<User[]> = computed(() => {
     if (!filteredUsers.value || filteredUsers.value.length === 0) return [];
 
     return [...filteredUsers.value].sort((a, b) => {
-      let fieldA, fieldB;
+      let fieldA: any, fieldB: any;
 
       // Handle nested fields like company.name
       if (sortBy.value.field === 'company') {
         fieldA = a.company.name;
         fieldB = b.company.name;
       } else {
-        fieldA = a[sortBy.value.field];
-        fieldB = b[sortBy.value.field];
+        fieldA = a[sortBy.value.field as keyof User];
+        fieldB = b[sortBy.value.field as keyof User];
       }
 
       // Case insensitive string comparison
@@ -110,7 +111,7 @@ export function useUsers() {
   });
 
   // Get paginated users
-  const paginatedUsers = computed(() => {
+  const paginatedUsers: ComputedRef<User[]> = computed(() => {
     if (!sortedUsers.value || sortedUsers.value.length === 0) return [];
 
     const startIndex = (pagination.value.currentPage - 1) * pagination.value.pageSize;
@@ -120,19 +121,19 @@ export function useUsers() {
   });
 
   // Check if any filters are applied
-  const isFiltered = computed(() => {
+  const isFiltered: ComputedRef<boolean> = computed(() => {
     return Object.values(filters.value).some(value => value !== '');
   });
 
   // Set filter value
-  const setFilter = (filterName, value) => {
+  const setFilter = (filterName: keyof UserFilters, value: string): void => {
     filters.value[filterName] = value;
     // Reset to first page when filtering
     pagination.value.currentPage = 1;
   };
 
   // Clear all filters
-  const clearFilters = () => {
+  const clearFilters = (): void => {
     filters.value = {
       name: '',
       email: '',
@@ -143,7 +144,7 @@ export function useUsers() {
   };
 
   // Set sort criteria
-  const setSortBy = (field) => {
+  const setSortBy = (field: string): void => {
     // If clicking the same field, toggle direction
     if (sortBy.value.field === field) {
       sortBy.value.direction = sortBy.value.direction === 'asc' ? 'desc' : 'asc';
@@ -155,25 +156,25 @@ export function useUsers() {
   };
 
   // Pagination methods
-  const goToPage = (page) => {
+  const goToPage = (page: number): void => {
     if (page >= 1 && page <= pagination.value.totalPages) {
       pagination.value.currentPage = page;
     }
   };
 
-  const nextPage = () => {
+  const nextPage = (): void => {
     if (pagination.value.currentPage < pagination.value.totalPages) {
       pagination.value.currentPage++;
     }
   };
 
-  const prevPage = () => {
+  const prevPage = (): void => {
     if (pagination.value.currentPage > 1) {
       pagination.value.currentPage--;
     }
   };
 
-  const setPageSize = (size) => {
+  const setPageSize = (size: number): void => {
     pagination.value.pageSize = size;
     pagination.value.totalPages = Math.ceil(pagination.value.totalItems / size);
 
@@ -182,7 +183,7 @@ export function useUsers() {
   };
 
   // Refresh users data
-  const refreshUsers = async () => {
+  const refreshUsers = async (): Promise<void> => {
     await refetch();
   };
 

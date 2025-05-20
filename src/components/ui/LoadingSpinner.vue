@@ -5,20 +5,18 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'LoadingSpinner',
-  props: {
-    message: {
-      type: String,
-      default: 'Loading...'
-    },
-    overlay: {
-      type: Boolean,
-      default: false
-    }
-  }
+<script setup lang="ts">
+import { defineProps, withDefaults } from 'vue';
+
+interface LoadingSpinnerProps {
+  message?: string;
+  overlay?: boolean;
 }
+
+withDefaults(defineProps<LoadingSpinnerProps>(), {
+  message: 'Loading...',
+  overlay: false
+});
 </script>
 
 <style scoped>

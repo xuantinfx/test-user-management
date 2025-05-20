@@ -1,8 +1,9 @@
-import axios from 'axios';
+import axios, { AxiosInstance, AxiosResponse, AxiosError } from 'axios';
+import { User } from '@/types';
 
 // Create axios instance with base URL from environment variables
-const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+const apiClient: AxiosInstance = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL as string,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -15,17 +16,17 @@ apiClient.interceptors.request.use(
     // You could add authentication headers here
     return config;
   },
-  error => {
+  (error: AxiosError) => {
     return Promise.reject(error);
   }
 );
 
 // Add response interceptor for error handling
 apiClient.interceptors.response.use(
-  response => {
+  (response: AxiosResponse) => {
     return response;
   },
-  error => {
+  (error: AxiosError) => {
     // Handle common errors
     if (error.response) {
       // Server responded with a status code outside of 2xx range
@@ -44,12 +45,12 @@ apiClient.interceptors.response.use(
 // User API service
 export const userService = {
   // Get all users
-  getUsers() {
+  getUsers(): Promise<AxiosResponse<User[]>> {
     return apiClient.get('/users');
   },
 
   // Get a specific user by ID
-  getUser(id) {
+  getUser(id: number | string): Promise<AxiosResponse<User>> {
     return apiClient.get(`/users/${id}`);
   }
 };

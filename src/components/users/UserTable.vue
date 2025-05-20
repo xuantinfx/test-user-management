@@ -83,7 +83,7 @@
           <button
             v-for="page in displayedPages"
             :key="page"
-            @click="goToPage(page)"
+            @click="typeof page === 'number' ? goToPage(page) : null"
             class="pagination-btn"
             :class="{ active: pagination.currentPage === page }"
           >
@@ -120,95 +120,75 @@
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
 import { ref, computed } from 'vue';
-import { useUsers } from '../../hooks/useUsers';
+import { useUsers } from '@/hooks/useUsers';
 
-export default {
-  name: 'UserTable',
-  setup() {
-    const {
-      sortBy,
-      setSortBy,
-      paginatedUsers,
-      users,
-      isLoading,
-      error,
-      pagination,
-      goToPage,
-      nextPage,
-      prevPage,
-      setPageSize
-    } = useUsers();
+// Get users data and methods from the hook
+const {
+  sortBy,
+  setSortBy,
+  paginatedUsers,
+  users,
+  isLoading,
+  error,
+  pagination,
+  goToPage,
+  nextPage,
+  prevPage,
+  setPageSize
+} = useUsers();
 
-    // Page size state
-    const pageSize = ref(pagination.value.pageSize);
+// Page size state
+const pageSize = ref<number>(pagination.value.pageSize);
 
-    // Calculate which page numbers to display
-    const displayedPages = computed(() => {
-      const totalPages = pagination.value.totalPages;
-      const currentPage = pagination.value.currentPage;
+// Calculate which page numbers to display
+const displayedPages = computed<Array<number | string>>(() => {
+  const totalPages = pagination.value.totalPages;
+  const currentPage = pagination.value.currentPage;
 
-      if (totalPages <= 7) {
-        // If 7 or fewer pages, show all
-        return Array.from({ length: totalPages }, (_, i) => i + 1);
-      }
-
-      // Always include first and last page
-      const pages = [1, totalPages];
-
-      // Add current page and pages around it
-      const pagesToAdd = [
-        currentPage - 2,
-        currentPage - 1,
-        currentPage,
-        currentPage + 1,
-        currentPage + 2
-      ].filter(p => p > 1 && p < totalPages);
-
-      // Add ellipses where needed
-      if (pagesToAdd[0] > 2) {
-        pages.splice(1, 0, '...');
-      }
-
-      // Add the pages around current page
-      pages.splice(pages.indexOf(1) + 1, 0, ...pagesToAdd);
-
-      // Add ellipsis before last page if needed
-      if (pagesToAdd[pagesToAdd.length - 1] < totalPages - 1) {
-        pages.splice(pages.indexOf(totalPages), 0, '...');
-      }
-
-      return pages;
-    });
-
-    // Sort users by field
-    const sortUsers = (field) => {
-      setSortBy(field);
-    };
-
-    // Update page size
-    const updatePageSize = () => {
-      setPageSize(Number(pageSize.value));
-    };
-
-    return {
-      sortBy,
-      sortUsers,
-      paginatedUsers,
-      users,
-      isLoading,
-      error,
-      pagination,
-      displayedPages,
-      pageSize,
-      goToPage,
-      nextPage,
-      prevPage,
-      updatePageSize
-    };
+  if (totalPages <= 7) {
+    // If 7 or fewer pages, show all
+    return Array.from({ length: totalPages }, (_, i) => i + 1);
   }
-}
+
+  // Always include first and last page
+  const pages: Array<number | string> = [1, totalPages];
+
+  // Add current page and pages around it
+  const pagesToAdd = [
+    currentPage - 2,
+    currentPage - 1,
+    currentPage,
+    currentPage + 1,
+    currentPage + 2
+  ].filter(p => p > 1 && p < totalPages);
+
+  // Add ellipses where needed
+  if (pagesToAdd[0] > 2) {
+    pages.splice(1, 0, '...' as string);
+  }
+
+  // Add the pages around current page
+  pages.splice(pages.indexOf(1) + 1, 0, ...pagesToAdd);
+
+  // Add ellipsis before last page if needed
+  if (pagesToAdd[pagesToAdd.length - 1] < totalPages - 1) {
+    pages.splice(pages.indexOf(totalPages as number), 0, '...' as string);
+  }
+
+  return pages;
+});
+
+// Sort users by field
+const sortUsers = (field: string): void => {
+  setSortBy(field);
+};
+
+// Update page size
+const updatePageSize = (): void => {
+  setPageSize(Number(pageSize.value));
+};
 </script>
 
 <style scoped>

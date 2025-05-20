@@ -18,26 +18,26 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'ErrorAlert',
-  props: {
-    message: {
-      type: String,
-      default: ''
-    },
-    type: {
-      type: String,
-      default: 'error',
-      validator: (value) => ['error', 'warning', 'info'].includes(value)
-    },
-    dismissible: {
-      type: Boolean,
-      default: true
-    }
-  },
-  emits: ['dismiss']
+<script setup lang="ts">
+import { defineProps, defineEmits, withDefaults } from 'vue';
+
+type AlertType = 'error' | 'warning' | 'info';
+
+interface ErrorAlertProps {
+  message?: string;
+  type?: AlertType;
+  dismissible?: boolean;
 }
+
+withDefaults(defineProps<ErrorAlertProps>(), {
+  message: '',
+  type: 'error',
+  dismissible: true
+});
+
+defineEmits<{
+  (e: 'dismiss'): void;
+}>();
 </script>
 
 <style scoped>

@@ -40,43 +40,33 @@
   </div>
 </template>
 
-<script>
-import { useUsers } from '../../hooks/useUsers';
+<script setup lang="ts">
+import { useUsers } from '@/hooks/useUsers';
 import { reactive, watch } from 'vue';
+import { UserFilters } from '@/types';
 
-export default {
-  name: 'UserFilter',
-  setup() {
-    const { filters: storeFilters, setFilter, clearFilters } = useUsers();
+const { filters: storeFilters, setFilter, clearFilters } = useUsers();
 
-    // Create a local reactive copy of the filters
-    const filters = reactive({
-      name: storeFilters.value.name,
-      email: storeFilters.value.email,
-      company: storeFilters.value.company
-    });
+// Create a local reactive copy of the filters
+const filters = reactive<UserFilters>({
+  name: storeFilters.value.name,
+  email: storeFilters.value.email,
+  company: storeFilters.value.company
+});
 
-    // Watch for store filter changes and update local filters
-    watch(() => storeFilters.value, (newFilters) => {
-      filters.name = newFilters.name;
-      filters.email = newFilters.email;
-      filters.company = newFilters.company;
-    }, { deep: true });
+// Watch for store filter changes and update local filters
+watch(() => storeFilters.value, (newFilters: UserFilters) => {
+  filters.name = newFilters.name;
+  filters.email = newFilters.email;
+  filters.company = newFilters.company;
+}, { deep: true });
 
-    // Update store filters when local filters change
-    const updateFilters = () => {
-      setFilter('name', filters.name);
-      setFilter('email', filters.email);
-      setFilter('company', filters.company);
-    };
-
-    return {
-      filters,
-      updateFilters,
-      clearFilters
-    };
-  }
-}
+// Update store filters when local filters change
+const updateFilters = (): void => {
+  setFilter('name', filters.name);
+  setFilter('email', filters.email);
+  setFilter('company', filters.company);
+};
 </script>
 
 <style scoped>

@@ -1,11 +1,19 @@
-import { createRouter, createWebHistory } from 'vue-router';
+import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
 
 // Import views
 import UserDashboard from '../views/UserDashboard.vue';
 import UserDetails from '../views/UserDetails.vue';
 import NotFound from '../views/NotFound.vue';
 
-const routes = [
+// Define custom meta type
+declare module 'vue-router' {
+  interface RouteMeta {
+    title?: string;
+  }
+}
+
+// Define routes with proper typing
+const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     name: 'dashboard',
@@ -38,7 +46,7 @@ const router = createRouter({
 });
 
 // Update document title based on route meta
-router.beforeEach((to, from, next) => {
+router.beforeEach((to, _from, next) => {
   document.title = to.meta.title || 'User Dashboard';
   next();
 });

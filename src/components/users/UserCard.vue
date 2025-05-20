@@ -9,7 +9,7 @@
         <p class="username">@{{ user.username }}</p>
       </div>
     </div>
-    
+
     <div class="user-details">
       <div class="detail-group">
         <h3>Contact Information</h3>
@@ -28,7 +28,7 @@
           </a>
         </div>
       </div>
-      
+
       <div class="detail-group">
         <h3>Address</h3>
         <div class="detail-item">
@@ -44,9 +44,9 @@
           <span>{{ user.address.zipcode }}</span>
         </div>
         <div class="detail-item map-link">
-          <a 
-            :href="mapUrl" 
-            target="_blank" 
+          <a
+            :href="mapUrl"
+            target="_blank"
             rel="noopener noreferrer"
             class="map-btn"
           >
@@ -54,7 +54,7 @@
           </a>
         </div>
       </div>
-      
+
       <div class="detail-group">
         <h3>Company</h3>
         <div class="detail-item">
@@ -71,7 +71,7 @@
         </div>
       </div>
     </div>
-    
+
     <div class="user-actions">
       <router-link :to="{ name: 'dashboard' }" class="back-btn">
         Back to Dashboard
@@ -80,33 +80,31 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'UserCard',
-  props: {
-    user: {
-      type: Object,
-      required: true
-    }
-  },
-  computed: {
-    // Get user initials for avatar
-    initials() {
-      if (!this.user.name) return '';
-      return this.user.name
-        .split(' ')
-        .map(word => word[0])
-        .join('')
-        .toUpperCase();
-    },
-    
-    // Generate Google Maps URL
-    mapUrl() {
-      const { lat, lng } = this.user.address.geo;
-      return `https://www.google.com/maps?q=${lat},${lng}`;
-    }
-  }
+<script setup lang="ts">
+import { computed } from 'vue';
+import { User } from '@/types';
+
+interface UserCardProps {
+  user: User;
 }
+
+const props = defineProps<UserCardProps>();
+
+// Get user initials for avatar
+const initials = computed<string>(() => {
+  if (!props.user.name) return '';
+  return props.user.name
+    .split(' ')
+    .map((word: string) => word[0])
+    .join('')
+    .toUpperCase();
+});
+
+// Generate Google Maps URL
+const mapUrl = computed<string>(() => {
+  const { lat, lng } = props.user.address.geo;
+  return `https://www.google.com/maps?q=${lat},${lng}`;
+});
 </script>
 
 <style scoped>
@@ -239,12 +237,12 @@ export default {
   .user-details {
     grid-template-columns: 1fr;
   }
-  
+
   .user-header {
     flex-direction: column;
     text-align: center;
   }
-  
+
   .avatar {
     margin-right: 0;
     margin-bottom: 1rem;

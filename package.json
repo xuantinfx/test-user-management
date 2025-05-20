@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "build": "vue-tsc && vite build",
+    "preview": "vite preview",
+    "type-check": "vue-tsc --noEmit"
   },
   "dependencies": {
     "@tanstack/vue-query": "^5.76.0",
@@ -15,7 +16,12 @@
     "vue-router": "^4.5.1"
   },
   "devDependencies": {
+    "@types/axios": "^0.14.4",
+    "@types/node": "^22.15.19",
     "@vitejs/plugin-vue": "^5.2.3",
-    "vite": "^6.3.5"
+    "@vitejs/plugin-vue-jsx": "^4.2.0",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.5",
+    "vue-tsc": "^2.2.10"
   }
 }
