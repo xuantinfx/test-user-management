@@ -5,6 +5,21 @@ A production-ready, responsive Vue.js application that fetches and displays user
 ## Goto this site
 [https://test-user-management-xi.vercel.app/](https://test-user-management-xi.vercel.app/)
 
+## Table of Contents
+
+- [Screenshots](#screenshots)
+- [Features](#features)
+- [Technology Stack](#technology-stack)
+- [Architecture and Design Patterns](#architecture-and-design-patterns)
+- [Key Features Implementation](#key-features-implementation)
+- [Performance Optimizations](#performance-optimizations)
+- [Security Considerations](#security-considerations)
+- [Technical Challenges and Solutions](#technical-challenges-and-solutions)
+- [Getting Started](#getting-started)
+- [Testing](#testing)
+- [Future Enhancements](#future-enhancements)
+- [Project Structure](#project-structure)
+
 ## Screenshots
 
 ### User Dashboard
@@ -77,21 +92,6 @@ A production-ready, responsive Vue.js application that fetches and displays user
 
 #### User not found
 ![User Not Found - Light Theme](screenshots/user-notfound-light.png)
-
-## Table of Contents
-
-- [Screenshots](#screenshots)
-- [Features](#features)
-- [Technology Stack](#technology-stack)
-- [Architecture and Design Patterns](#architecture-and-design-patterns)
-- [Key Features Implementation](#key-features-implementation)
-- [Performance Optimizations](#performance-optimizations)
-- [Security Considerations](#security-considerations)
-- [Technical Challenges and Solutions](#technical-challenges-and-solutions)
-- [Getting Started](#getting-started)
-- [Testing](#testing)
-- [Future Enhancements](#future-enhancements)
-- [Project Structure](#project-structure)
 
 ## Features
 
