@@ -75,6 +75,9 @@ A production-ready, responsive Vue.js application that fetches and displays user
   </div>
 </div>
 
+#### User not found
+![User Not Found - Light Theme](screenshots/user-notfound-light.png)
+
 ## Table of Contents
 
 - [Screenshots](#screenshots)
