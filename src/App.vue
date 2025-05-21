@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from 'vue';
-import ThemeToggle from './components/ui/ThemeToggle.vue';
+import { ref, onMounted, onUnmounted, watch } from "vue";
+import ThemeToggle from "./components/ui/ThemeToggle.vue";
 
 // Mobile menu state
 const menuOpen = ref(false);
@@ -12,12 +12,17 @@ const toggleMenu = () => {
 
 // Function to handle clicks outside the drawer
 const handleClickOutside = (event: MouseEvent) => {
-  const nav = document.querySelector('.nav');
-  const menuToggle = document.querySelector('.menu-toggle');
+  const nav = document.querySelector(".nav");
+  const menuToggle = document.querySelector(".menu-toggle");
 
   // If the drawer is open and the click is outside the nav and not on the menu toggle
-  if (menuOpen.value && nav && !nav.contains(event.target as Node) &&
-      menuToggle && !menuToggle.contains(event.target as Node)) {
+  if (
+    menuOpen.value &&
+    nav &&
+    !nav.contains(event.target as Node) &&
+    menuToggle &&
+    !menuToggle.contains(event.target as Node)
+  ) {
     menuOpen.value = false;
   }
 };
@@ -26,20 +31,20 @@ const handleClickOutside = (event: MouseEvent) => {
 watch(menuOpen, (isOpen) => {
   if (isOpen) {
     // Disable scrolling on the body when drawer is open
-    document.body.classList.add('drawer-open');
+    document.body.classList.add("drawer-open");
   } else {
     // Re-enable scrolling when drawer is closed
-    document.body.classList.remove('drawer-open');
+    document.body.classList.remove("drawer-open");
   }
 });
 
 // Add and remove event listeners
 onMounted(() => {
-  document.addEventListener('click', handleClickOutside);
+  document.addEventListener("click", handleClickOutside);
 });
 
 onUnmounted(() => {
-  document.removeEventListener('click', handleClickOutside);
+  document.removeEventListener("click", handleClickOutside);
 });
 </script>
 
@@ -48,17 +53,21 @@ onUnmounted(() => {
     <header class="app-header">
       <div class="container">
         <div class="header-content">
-          <div class="logo">
+          <router-link :to="{ name: 'dashboard' }" class="logo">
             <img src="./assets/vue.svg" alt="Vue logo" />
             <h1>User Dashboard</h1>
-          </div>
-          <button class="menu-toggle" @click="toggleMenu" aria-label="Toggle menu">
+          </router-link>
+          <button
+            class="menu-toggle"
+            @click="toggleMenu"
+            aria-label="Toggle menu"
+          >
             <span></span>
             <span></span>
             <span></span>
           </button>
           <!-- Overlay that appears when drawer is open -->
-          <div class="drawer-overlay" :class="{ 'active': menuOpen }"></div>
+          <div class="drawer-overlay" :class="{ active: menuOpen }"></div>
           <nav class="nav" :class="{ 'nav-open': menuOpen }">
             <router-link :to="{ name: 'dashboard' }">Dashboard</router-link>
             <div class="theme-toggle-wrapper">
@@ -75,7 +84,10 @@ onUnmounted(() => {
 
     <footer class="app-footer">
       <div class="container">
-        <p>&copy; {{ new Date().getFullYear() }} User Dashboard. Built with Vue 3 and Vite.</p>
+        <p>
+          &copy; {{ new Date().getFullYear() }} User Dashboard. Built with Vue 3
+          and Vite.
+        </p>
       </div>
     </footer>
   </div>
@@ -99,7 +111,8 @@ onUnmounted(() => {
   --breakpoint-xl: 1280px;
 
   /* Theme transition */
-  --theme-transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  --theme-transition: color 0.3s ease, background-color 0.3s ease,
+    border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 /* Light theme (default) */
@@ -140,8 +153,10 @@ onUnmounted(() => {
 
   /* Shadows */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
 /* Dark theme */
@@ -182,8 +197,10 @@ onUnmounted(() => {
 
   /* Shadows */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3),
+    0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3),
+    0 4px 6px -2px rgba(0, 0, 0, 0.2);
 }
 
 * {
@@ -193,7 +210,8 @@ onUnmounted(() => {
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
   color: var(--text-color);
   background-color: var(--bg-color);
   line-height: 1.5;
@@ -252,6 +270,11 @@ button {
   justify-content: space-between;
   align-items: center;
   width: 100%;
+}
+
+
+.header-content a:hover {
+  text-decoration: none;
 }
 
 .logo {
