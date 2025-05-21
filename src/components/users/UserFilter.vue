@@ -51,7 +51,7 @@
 
 <script setup lang="ts">
 import { useUsers } from '@/hooks/useUsers';
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed } from 'vue';
 import { UserFilters } from '@/types';
 import { debounce } from '@/utils/debounce';
 

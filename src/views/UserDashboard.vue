@@ -52,10 +52,8 @@ const refreshing = ref<boolean>(false);
 const {
   users,
   paginatedUsers,
-  sortedUsers,
   filteredUsers,
   isLoading,
-  isError,
   error,
   isFiltered,
   refreshUsers: refetchUsers

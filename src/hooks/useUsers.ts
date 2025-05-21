@@ -1,5 +1,5 @@
 import { computed, ComputedRef, reactive } from 'vue';
-import { useQuery, useQueryClient } from '@tanstack/vue-query';
+import { useQuery } from '@tanstack/vue-query';
 import { userService } from '../services/api';
 import { User, UserFilters, SortCriteria, Pagination } from '@/types';
 
