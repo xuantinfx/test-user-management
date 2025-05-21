@@ -985,6 +985,9 @@ npm run test:watch
 npm run test:coverage
 ```
 
+#### Test reports with `yarn run test`
+![Test report](screenshots/test.png)
+
 ### Implemented Tests
 
 We have implemented tests for two UI components and one composable function:
