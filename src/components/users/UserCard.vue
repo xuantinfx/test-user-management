@@ -265,7 +265,7 @@ const mapUrl = computed<string>(() => {
 
 .back-btn {
   display: inline-block;
-  background-color: var(--text-light);
+  background-color: var(--primary-light);
   color: white;
   padding: var(--space-sm) var(--space-md);
   border-radius: 4px;
