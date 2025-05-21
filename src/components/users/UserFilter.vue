@@ -8,7 +8,7 @@
           <input
             id="name-filter"
             type="text"
-            :value="currentFilters.name"
+            v-model="localFilters.name"
             @input="e => handleFilterInput(e, 'name')"
             placeholder="Filter by name"
           />
@@ -22,7 +22,7 @@
           <input
             id="email-filter"
             type="text"
-            :value="currentFilters.email"
+            v-model="localFilters.email"
             @input="e => handleFilterInput(e, 'email')"
             placeholder="Filter by email"
           />
@@ -36,7 +36,7 @@
           <input
             id="company-filter"
             type="text"
-            :value="currentFilters.company"
+            v-model="localFilters.company"
             @input="e => handleFilterInput(e, 'company')"
             placeholder="Filter by company"
           />
@@ -51,26 +51,19 @@
 
 <script setup lang="ts">
 import { useUsers } from '@/hooks/useUsers';
-import { ref, computed } from 'vue';
+import { ref, watch } from 'vue';
 import { UserFilters } from '@/types';
 import { debounce } from '@/utils/debounce';
 
 // Get the shared filters and actions from the hook
 const { filters, setFilter, clearFilters: clearFiltersHook } = useUsers();
 
-// Create a computed property for the current filters that unwraps the computed ref
-const currentFilters = computed(() => {
-  return filters.value;
+// Create local reactive state for immediate input updates
+const localFilters = ref<UserFilters>({
+  name: filters.value.name,
+  email: filters.value.email,
+  company: filters.value.company
 });
-
-// Wrapper for clearFilters to also reset debouncing state
-const clearFilters = () => {
-  clearFiltersHook();
-  // Reset all debouncing indicators
-  Object.keys(debouncingFields.value).forEach(key => {
-    debouncingFields.value[key as keyof UserFilters] = false;
-  });
-};
 
 // Track which fields are currently being debounced
 const debouncingFields = ref<Record<keyof UserFilters, boolean>>({
@@ -87,10 +80,39 @@ const debouncedSetFilter = debounce((field: keyof UserFilters, value: string) =>
 
 // Handle input events with debouncing
 const handleFilterInput = (event: Event, field: keyof UserFilters): void => {
-  const target = event.target as HTMLInputElement;
+  // No need to get value from event.target as v-model handles the local state update
   debouncingFields.value[field] = true;
-  debouncedSetFilter(field, target.value);
+  debouncedSetFilter(field, localFilters.value[field]);
 };
+
+// Wrapper for clearFilters to also reset debouncing state and local filters
+const clearFilters = () => {
+  clearFiltersHook();
+
+  // Reset all debouncing indicators
+  Object.keys(debouncingFields.value).forEach(key => {
+    debouncingFields.value[key as keyof UserFilters] = false;
+  });
+
+  // Reset local filters
+  localFilters.value = {
+    name: '',
+    email: '',
+    company: ''
+  };
+};
+
+// Watch for changes to the global filters (in case they're updated elsewhere)
+// and sync them to our local filters
+watch(() => filters.value, (newFilters) => {
+  // Only update if we're not currently debouncing to avoid overriding user input
+  Object.keys(newFilters).forEach(key => {
+    const field = key as keyof UserFilters;
+    if (!debouncingFields.value[field]) {
+      localFilters.value[field] = newFilters[field];
+    }
+  });
+}, { deep: true });
 </script>
 
 <style scoped>
